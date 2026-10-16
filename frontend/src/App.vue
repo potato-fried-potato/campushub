@@ -4,6 +4,7 @@
       <span class="logo">智校互联 CampusHub</span>
       <router-link to="/">首页</router-link>
       <router-link to="/login">登录</router-link>
+      <router-link to="/mine">我的发布</router-link>
     </div>
     <router-view />
   </div>
