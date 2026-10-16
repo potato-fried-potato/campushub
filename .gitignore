@@ -1,0 +1,23 @@
+# 本地敏感文件（禁止提交与推送，详见 AGENTS.md）
+成员邮箱与令牌_提交与推送一定要忽略.txt
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Java / Maven
+backend/target/
+*.class
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# 日志
+*.log
+logs/
