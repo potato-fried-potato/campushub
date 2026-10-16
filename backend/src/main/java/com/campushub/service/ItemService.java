@@ -18,4 +18,8 @@ public class ItemService {
         return itemMapper.getItemList();
     }
 
+    public List<Item> getMyItems(Long userId) {
+        return itemMapper.getMyItems(userId);
+    }
+
 }

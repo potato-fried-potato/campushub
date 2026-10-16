@@ -12,4 +12,13 @@
         order by i.created_at desc
     </select>
 
+    <select id="getMyItems" resultType="com.campushub.entity.Item">
+        select i.*, u.nickname as sellerName, c.name as categoryName
+        from item i
+        left join `user` u on i.seller_id = u.id
+        left join category c on i.category_id = c.id
+        where i.seller_id = #{userId}
+        order by i.created_at desc
+    </select>
+
 </mapper>
