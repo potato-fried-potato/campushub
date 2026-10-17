@@ -7,4 +7,17 @@
         select * from `user` where student_no = #{studentNo}
     </select>
 
+    <select id="getUserById" resultType="com.campushub.entity.User">
+        select * from `user` where id = #{id}
+    </select>
+
+    <insert id="insertUser" parameterType="com.campushub.entity.User" useGeneratedKeys="true" keyProperty="id">
+        insert into `user` (student_no, password, nickname, phone, avatar, role, status)
+        values (#{studentNo}, #{password}, #{nickname}, #{phone}, #{avatar}, #{role}, #{status})
+    </insert>
+
+    <update id="updatePassword">
+        update `user` set password = #{password} where id = #{id}
+    </update>
+
 </mapper>

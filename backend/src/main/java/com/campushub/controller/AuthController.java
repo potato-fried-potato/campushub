@@ -35,4 +35,30 @@ public class AuthController {
         return Result.success(data);
     }
 
+    // 注册
+    @PostMapping("/register")
+    public Result register(@RequestBody Map<String, String> params) {
+        String studentNo = params.get("studentNo");
+        String password = params.get("password");
+        String nickname = params.get("nickname");
+        String phone = params.get("phone");
+        if (studentNo == null || !studentNo.trim().matches("[A-Za-z0-9]{6,20}")) {
+            return Result.fail("学号需为 6~20 位字母或数字");
+        }
+        if (password == null || password.length() < 6 || password.length() > 20) {
+            return Result.fail("密码长度需为 6~20 位");
+        }
+        if (nickname == null || nickname.trim().length() == 0 || nickname.trim().length() > 16) {
+            return Result.fail("昵称需为 1~16 个字");
+        }
+        if (phone == null || !phone.trim().matches("1\\d{10}")) {
+            return Result.fail("手机号格式不正确");
+        }
+        Map<String, Object> data = userService.register(studentNo.trim(), password, nickname.trim(), phone.trim());
+        if (data == null) {
+            return Result.fail(4005, "学号已被注册");
+        }
+        return Result.success(data);
+    }
+
 }
