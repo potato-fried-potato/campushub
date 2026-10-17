@@ -31,7 +31,13 @@ public interface ItemMapper {
                    @Param("excludeUserId") Long excludeUserId);
 
     // 某个用户发布的商品
-    List<Item> getMyItems(@Param("userId") Long userId);
+    List<Item> getMyItems(@Param("userId") Long userId,
+                          @Param("status") String status,
+                          @Param("offset") int offset,
+                          @Param("pageSize") int pageSize);
+
+    // 某个用户发布的商品总数
+    int countMyItems(@Param("userId") Long userId, @Param("status") String status);
 
     // 根据 id 查商品
     Item getItemById(@Param("id") Long id);
@@ -44,5 +50,8 @@ public interface ItemMapper {
 
     // 卖家信用评分统计
     Map<String, Object> getSellerRating(@Param("sellerId") Long sellerId);
+
+    // 更新商品状态
+    int updateStatus(@Param("id") Long id, @Param("status") String status);
 
 }

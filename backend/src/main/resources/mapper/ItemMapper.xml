@@ -63,7 +63,20 @@
     <select id="getMyItems" resultType="com.campushub.entity.Item">
         <include refid="itemColumns"/>
         where i.seller_id = #{userId}
+        <if test="status != null and status != ''">
+            and i.status = #{status}
+        </if>
         order by i.created_at desc
+        limit #{offset}, #{pageSize}
+    </select>
+
+    <select id="countMyItems" resultType="int">
+        select count(*)
+        from item i
+        where i.seller_id = #{userId}
+        <if test="status != null and status != ''">
+            and i.status = #{status}
+        </if>
     </select>
 
     <select id="getItemById" resultType="com.campushub.entity.Item">
@@ -83,5 +96,9 @@
         select ifnull(round(avg(rating), 1), 0) as avgRating, count(*) as reviewCount
         from review where target_id = #{sellerId}
     </select>
+
+    <update id="updateStatus">
+        update item set status = #{status}, updated_at = now() where id = #{id}
+    </update>
 
 </mapper>

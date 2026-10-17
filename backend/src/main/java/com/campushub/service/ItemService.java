@@ -1,7 +1,9 @@
 package com.campushub.service;
 
 import com.campushub.entity.Item;
+import com.campushub.entity.User;
 import com.campushub.mapper.ItemMapper;
+import com.campushub.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,9 @@ public class ItemService {
 
     @Autowired
     private ItemMapper itemMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * 集市列表：筛选 + 排序 + 分页（AC-2.1 ~ 2.5）
@@ -35,8 +40,21 @@ public class ItemService {
         return buildPage(list, total, page, size);
     }
 
-    public List<Item> getMyItems(Long userId) {
-        return itemMapper.getMyItems(userId);
+    /**
+     * 我的发布：状态筛选 + 分页（AC-5.1）
+     */
+    public Map<String, Object> getMyItemsPage(Long userId, String status, Integer pageNum, Integer pageSize) {
+        String queryStatus = status;
+        if (queryStatus == null || queryStatus.trim().length() == 0 || "ALL".equals(queryStatus)) {
+            queryStatus = null;
+        }
+        int page = (pageNum == null || pageNum < 1) ? 1 : pageNum;
+        int size = (pageSize == null || pageSize < 1 || pageSize > 50) ? 12 : pageSize;
+        int offset = (page - 1) * size;
+
+        List<Item> list = itemMapper.getMyItems(userId, queryStatus, offset, size);
+        int total = itemMapper.countMyItems(userId, queryStatus);
+        return buildPage(list, total, page, size);
     }
 
     /**
@@ -86,6 +104,45 @@ public class ItemService {
         data.put("pageNum", page);
         data.put("pageSize", size);
         return data;
+    }
+
+    /**
+     * 商品状态流转（AC-5.2）
+     * 返回 0 表示成功，其它返回对应的业务码
+     */
+    public int updateStatus(Long itemId, Long userId, String targetStatus) {
+        if (userId == null) {
+            return 4001;
+        }
+        Item item = itemMapper.getItemById(itemId);
+        if (item == null) {
+            return 4004;
+        }
+        User operator = userMapper.getUserById(userId);
+        if (operator == null) {
+            return 4004;
+        }
+        boolean owner = item.getSellerId().equals(userId);
+        boolean admin = "ADMIN".equals(operator.getRole());
+        if (!owner && !admin) {
+            return 4003;
+        }
+        if (!canChangeStatus(item.getStatus(), targetStatus)) {
+            return 4005;
+        }
+        itemMapper.updateStatus(itemId, targetStatus);
+        return 0;
+    }
+
+    // 允许：在售 -> 下架 / 已售，下架 -> 在售；已售不能再改
+    private boolean canChangeStatus(String from, String to) {
+        if ("ON_SALE".equals(from)) {
+            return "OFF_SHELF".equals(to) || "SOLD".equals(to);
+        }
+        if ("OFF_SHELF".equals(from)) {
+            return "ON_SALE".equals(to);
+        }
+        return false;
     }
 
 }
