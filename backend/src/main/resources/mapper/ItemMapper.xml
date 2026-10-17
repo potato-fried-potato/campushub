@@ -3,22 +3,85 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.campushub.mapper.ItemMapper">
 
-    <select id="getItemList" resultType="com.campushub.entity.Item">
-        select i.*, u.nickname as sellerName, c.name as categoryName
+    <!-- 列表和详情都要用的公共字段 -->
+    <sql id="itemColumns">
+        select i.*, u.nickname as sellerName,
+               u.student_no as sellerStudentNo, u.phone as sellerPhone,
+               c.name as categoryName,
+               (select img.image_data from item_image img
+                where img.item_id = i.id order by img.sort_no limit 1) as coverImage,
+               exists(select 1 from reservation r
+                      where r.item_id = i.id and r.status = 'CONFIRMED') as reserved
         from item i
         left join `user` u on i.seller_id = u.id
         left join category c on i.category_id = c.id
-        where i.status = 'ON_SALE'
-        order by i.created_at desc
+    </sql>
+
+    <!-- 集市列表筛选条件 -->
+    <sql id="listWhere">
+        <where>
+            <if test="status != null and status != ''">
+                and i.status = #{status}
+            </if>
+            <if test="categoryId != null">
+                and i.category_id = #{categoryId}
+            </if>
+            <if test="conditionLevel != null and conditionLevel != ''">
+                and i.condition_level = #{conditionLevel}
+            </if>
+            <if test="campus != null and campus != ''">
+                and i.campus = #{campus}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                and (i.title like concat('%', #{keyword}, '%')
+                     or i.description like concat('%', #{keyword}, '%'))
+            </if>
+            <if test="excludeUserId != null">
+                and i.seller_id != #{excludeUserId}
+            </if>
+        </where>
+    </sql>
+
+    <select id="getItemList" resultType="com.campushub.entity.Item">
+        <include refid="itemColumns"/>
+        <include refid="listWhere"/>
+        <choose>
+            <when test="sort == 'priceAsc'">order by i.price asc</when>
+            <when test="sort == 'priceDesc'">order by i.price desc</when>
+            <when test="sort == 'views'">order by i.view_count desc</when>
+            <otherwise>order by i.created_at desc</otherwise>
+        </choose>
+        limit #{offset}, #{pageSize}
+    </select>
+
+    <select id="countItems" resultType="int">
+        select count(*)
+        from item i
+        <include refid="listWhere"/>
     </select>
 
     <select id="getMyItems" resultType="com.campushub.entity.Item">
-        select i.*, u.nickname as sellerName, c.name as categoryName
-        from item i
-        left join `user` u on i.seller_id = u.id
-        left join category c on i.category_id = c.id
+        <include refid="itemColumns"/>
         where i.seller_id = #{userId}
         order by i.created_at desc
+    </select>
+
+    <select id="getItemById" resultType="com.campushub.entity.Item">
+        <include refid="itemColumns"/>
+        where i.id = #{id}
+    </select>
+
+    <select id="getItemImages" resultType="string">
+        select image_data from item_image where item_id = #{itemId} order by sort_no
+    </select>
+
+    <update id="increaseViewCount">
+        update item set view_count = view_count + 1 where id = #{id}
+    </update>
+
+    <select id="getSellerRating" resultType="java.util.Map">
+        select ifnull(round(avg(rating), 1), 0) as avgRating, count(*) as reviewCount
+        from review where target_id = #{sellerId}
     </select>
 
 </mapper>

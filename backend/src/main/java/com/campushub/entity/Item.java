@@ -1,6 +1,7 @@
 package com.campushub.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 /**
  * 商品
@@ -18,10 +19,16 @@ public class Item {
     private String campus;
     private String status;
     private Integer viewCount;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     // 联表查出来的，不是数据库字段
     private String sellerName;
+    private String sellerStudentNo;
+    private String sellerPhone;
     private String categoryName;
+    private String coverImage;
+    private Boolean reserved;
 
     public Long getId() {
         return id;
@@ -119,11 +126,59 @@ public class Item {
         this.sellerName = sellerName;
     }
 
+    public String getSellerStudentNo() {
+        return sellerStudentNo;
+    }
+
+    public void setSellerStudentNo(String sellerStudentNo) {
+        this.sellerStudentNo = sellerStudentNo;
+    }
+
+    public String getSellerPhone() {
+        return sellerPhone;
+    }
+
+    public void setSellerPhone(String sellerPhone) {
+        this.sellerPhone = sellerPhone;
+    }
+
     public String getCategoryName() {
         return categoryName;
     }
 
     public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public String getCoverImage() {
+        return coverImage;
+    }
+
+    public void setCoverImage(String coverImage) {
+        this.coverImage = coverImage;
+    }
+
+    public Boolean getReserved() {
+        return reserved;
+    }
+
+    public void setReserved(Boolean reserved) {
+        this.reserved = reserved;
     }
 }
