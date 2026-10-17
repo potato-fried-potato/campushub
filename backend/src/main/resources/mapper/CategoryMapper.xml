@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campushub.mapper.CategoryMapper">
+
+    <select id="getCategoryList" resultType="com.campushub.entity.Category">
+        select c.id, c.name, c.icon, c.sort_no,
+               ifnull(t.cnt, 0) as onSaleCount
+        from category c
+        left join (
+            select category_id, count(*) as cnt
+            from item
+            where status = 'ON_SALE'
+            group by category_id
+        ) t on t.category_id = c.id
+        order by c.sort_no
+    </select>
+
+</mapper>
