@@ -25,6 +25,36 @@ const routes = [
     path: '/mine',
     name: 'mine',
     component: () => import('../views/MyItemsView.vue')
+  },
+  {
+    path: '/publish',
+    name: 'publish',
+    component: () => import('../views/PublishView.vue')
+  },
+  {
+    path: '/messages',
+    name: 'messages',
+    component: () => import('../views/MessagesView.vue')
+  },
+  {
+    path: '/bargains',
+    name: 'bargains',
+    component: () => import('../views/BargainView.vue')
+  },
+  {
+    path: '/reservations',
+    name: 'reservations',
+    component: () => import('../views/ReservationView.vue')
+  },
+  {
+    path: '/credit',
+    name: 'credit',
+    component: () => import('../views/CreditView.vue')
+  },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: () => import('../views/AdminView.vue')
   }
 ]
 
