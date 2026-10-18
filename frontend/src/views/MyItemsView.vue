@@ -1,8 +1,15 @@
 <template>
   <div class="mine">
-    <h2>我的发布</h2>
-    <div class="tip" v-if="!user">请先去登录页登录</div>
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">我的发布</h1>
+        <p class="page-sub">管理已发布商品的在售状态</p>
+      </div>
+    </div>
+    <div class="tip" v-if="!user">请先登录后再管理自己的商品</div>
     <template v-else>
+      <div class="panel">
+        <div class="panel-body">
       <el-radio-group v-model="status" @change="search">
         <el-radio-button value="ALL">全部</el-radio-button>
         <el-radio-button value="ON_SALE">在售</el-radio-button>
@@ -10,7 +17,7 @@
         <el-radio-button value="SOLD">已售</el-radio-button>
       </el-radio-group>
 
-      <el-table :data="items" style="width: 100%; margin-top: 15px">
+      <el-table :data="items" style="width: 100%">
         <el-table-column prop="title" label="标题" />
         <el-table-column prop="price" label="价格" width="100" />
         <el-table-column label="状态" width="100">
@@ -42,6 +49,8 @@
           </template>
         </el-table-column>
       </el-table>
+        </div>
+      </div>
 
       <el-pagination
         v-if="total > pageSize"
@@ -83,7 +92,6 @@ export default {
     loadMyItems() {
       axios.get('/api/items/mine', {
         params: {
-          userId: this.user.id,
           status: this.status,
           pageNum: this.pageNum,
           pageSize: this.pageSize
@@ -109,9 +117,7 @@ export default {
     changeStatus(row, status) {
       const actionText = status === 'ON_SALE' ? '重新上架' : (status === 'SOLD' ? '标记已售' : '下架')
       this.$confirm('确定要' + actionText + '「' + row.title + '」吗？', '提示').then(() => {
-        axios.patch('/api/items/' + row.id + '/status', { status: status }, {
-          params: { userId: this.user.id }
-        }).then(res => {
+        axios.patch('/api/items/' + row.id + '/status', { status: status }).then(res => {
           if (res.data.code === 0) {
             this.$message.success(actionText + '成功')
             this.loadMyItems()
