@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campushub.mapper.ReviewMapper">
+
+    <insert id="insert" parameterType="com.campushub.entity.Review" useGeneratedKeys="true" keyProperty="id">
+        insert into review (item_id, reviewer_id, target_id, rating, content)
+        values (#{itemId}, #{reviewerId}, #{targetId}, #{rating}, #{content})
+    </insert>
+
+    <select id="exists" resultType="int">
+        select count(*) from review where item_id = #{itemId} and reviewer_id = #{reviewerId}
+    </select>
+
+    <select id="listByTarget" resultType="com.campushub.entity.Review">
+        select r.*, u.nickname as reviewerNickname
+        from review r
+        left join `user` u on r.reviewer_id = u.id
+        where r.target_id = #{userId}
+        order by r.created_at desc
+    </select>
+
+    <select id="summary" resultType="java.util.Map">
+        select ifnull(round(avg(rating), 1), 0) as avgRating, count(*) as reviewCount
+        from review where target_id = #{userId}
+    </select>
+
+</mapper>

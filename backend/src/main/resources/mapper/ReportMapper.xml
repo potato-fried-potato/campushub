@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campushub.mapper.ReportMapper">
+
+    <insert id="insert" parameterType="com.campushub.entity.Report" useGeneratedKeys="true" keyProperty="id">
+        insert into report (item_id, reporter_id, reason, detail, status)
+        values (#{itemId}, #{reporterId}, #{reason}, #{detail}, 'PENDING')
+    </insert>
+
+    <select id="exists" resultType="int">
+        select count(*) from report where item_id = #{itemId} and reporter_id = #{reporterId}
+    </select>
+
+    <select id="getById" resultType="com.campushub.entity.Report">
+        select * from report where id = #{id}
+    </select>
+
+    <select id="list" resultType="com.campushub.entity.Report">
+        select r.*, i.title as itemTitle, u.nickname as reporterNickname
+        from report r
+        left join item i on r.item_id = i.id
+        left join `user` u on r.reporter_id = u.id
+        <where>
+            <if test="status != null and status != ''">and r.status = #{status}</if>
+        </where>
+        order by r.created_at desc
+        limit #{offset}, #{pageSize}
+    </select>
+
+    <select id="count" resultType="int">
+        select count(*) from report
+        <where>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+    </select>
+
+    <update id="updateStatus">
+        update report set status = #{status}, handled_by = #{handledBy}, handled_at = now()
+        where id = #{id}
+    </update>
+
+</mapper>

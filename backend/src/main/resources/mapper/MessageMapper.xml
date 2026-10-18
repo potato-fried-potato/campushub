@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campushub.mapper.MessageMapper">
+
+    <insert id="insert" parameterType="com.campushub.entity.ItemMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into item_message (item_id, sender_id, receiver_id, parent_id, content, is_read)
+        values (#{itemId}, #{senderId}, #{receiverId}, #{parentId}, #{content}, 0)
+    </insert>
+
+    <select id="getById" resultType="com.campushub.entity.ItemMessage">
+        select * from item_message where id = #{id}
+    </select>
+
+    <select id="getItemSellerId" resultType="long">
+        select seller_id from item where id = #{itemId}
+    </select>
+
+    <select id="listByItem" resultType="com.campushub.entity.ItemMessage">
+        select m.*, u.nickname as senderNickname
+        from item_message m
+        left join `user` u on m.sender_id = u.id
+        where m.item_id = #{itemId}
+        order by m.created_at asc
+    </select>
+
+    <select id="listMine" resultType="com.campushub.entity.ItemMessage">
+        select m.*, s.nickname as senderNickname, r.nickname as receiverNickname, i.title as itemTitle
+        from item_message m
+        left join `user` s on m.sender_id = s.id
+        left join `user` r on m.receiver_id = r.id
+        left join item i on m.item_id = i.id
+        <choose>
+            <when test="view == 'sent'">where m.sender_id = #{userId}</when>
+            <otherwise>where m.receiver_id = #{userId}</otherwise>
+        </choose>
+        order by m.created_at desc
+    </select>
+
+    <update id="markRead">
+        update item_message set is_read = 1 where id = #{id} and receiver_id = #{receiverId}
+    </update>
+
+</mapper>
