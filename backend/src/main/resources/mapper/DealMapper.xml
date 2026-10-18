@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campushub.mapper.DealMapper">
+
+    <sql id="dealColumns">
+        select d.*, i.title as itemTitle, i.price as itemPrice,
+               (select img.image_data from item_image img
+                where img.item_id = d.item_id order by img.sort_no limit 1) as itemCover,
+               b.nickname as buyerNickname, s.nickname as sellerNickname
+        from deal d
+        left join item i on d.item_id = i.id
+        left join `user` b on d.buyer_id = b.id
+        left join `user` s on d.seller_id = s.id
+    </sql>
+
+    <insert id="insert" parameterType="com.campushub.entity.Deal" useGeneratedKeys="true" keyProperty="id">
+        insert into deal (item_id, buyer_id, seller_id, deal_price, source, source_id, status)
+        values (#{itemId}, #{buyerId}, #{sellerId}, #{dealPrice}, #{source}, #{sourceId}, 'PENDING')
+    </insert>
+
+    <select id="getById" resultType="com.campushub.entity.Deal">
+        <include refid="dealColumns"/>
+        where d.id = #{id}
+    </select>
+
+    <select id="getActiveByItem" resultType="com.campushub.entity.Deal">
+        <include refid="dealColumns"/>
+        where d.item_id = #{itemId} and d.status = 'PENDING'
+        order by d.id desc limit 1
+    </select>
+
+    <select id="getCompletedByItem" resultType="com.campushub.entity.Deal">
+        <include refid="dealColumns"/>
+        where d.item_id = #{itemId} and d.status = 'COMPLETED'
+        order by d.id desc limit 1
+    </select>
+
+    <select id="list" resultType="com.campushub.entity.Deal">
+        select d.*, i.title as itemTitle, i.price as itemPrice,
+               (select img.image_data from item_image img
+                where img.item_id = d.item_id order by img.sort_no limit 1) as itemCover,
+               b.nickname as buyerNickname, s.nickname as sellerNickname,
+               (select count(*) from review r
+                where r.item_id = d.item_id and r.reviewer_id = #{userId}) as reviewed
+        from deal d
+        left join item i on d.item_id = i.id
+        left join `user` b on d.buyer_id = b.id
+        left join `user` s on d.seller_id = s.id
+        <where>
+            <choose>
+                <when test="view == 'sent'">and d.buyer_id = #{userId}</when>
+                <otherwise>and d.seller_id = #{userId}</otherwise>
+            </choose>
+            <if test="status != null and status != ''">and d.status = #{status}</if>
+        </where>
+        order by d.created_at desc
+    </select>
+
+    <select id="countPending" resultType="int">
+        select count(*) from deal d
+        <choose>
+            <when test="view == 'sent'">where d.buyer_id = #{userId}</when>
+            <otherwise>where d.seller_id = #{userId}</otherwise>
+        </choose>
+        and d.status = 'PENDING'
+    </select>
+
+    <select id="listPendingReview" resultType="com.campushub.entity.Deal">
+        <include refid="dealColumns"/>
+        where d.status = 'COMPLETED'
+          and (d.buyer_id = #{userId} or d.seller_id = #{userId})
+          and not exists(select 1 from review r where r.item_id = d.item_id and r.reviewer_id = #{userId})
+        order by d.completed_at desc
+    </select>
+
+    <update id="complete">
+        update deal set status = 'COMPLETED', completed_at = now()
+        where id = #{id} and status = 'PENDING'
+    </update>
+
+    <update id="cancel">
+        update deal set status = 'CANCELLED', cancelled_at = now()
+        where id = #{id} and status = 'PENDING'
+    </update>
+
+</mapper>

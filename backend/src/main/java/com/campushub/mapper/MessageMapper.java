@@ -21,4 +21,6 @@ public interface MessageMapper {
 
     int markRead(@Param("id") Long id, @Param("receiverId") Long receiverId);
 
+    int markReadByItem(@Param("itemId") Long itemId, @Param("receiverId") Long receiverId);
+
 }

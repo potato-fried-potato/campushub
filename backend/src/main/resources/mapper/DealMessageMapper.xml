@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campushub.mapper.DealMessageMapper">
+
+    <insert id="insert" parameterType="com.campushub.entity.DealMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into deal_message (deal_id, sender_id, receiver_id, content, is_read)
+        values (#{dealId}, #{senderId}, #{receiverId}, #{content}, 0)
+    </insert>
+
+    <select id="listByDeal" resultType="com.campushub.entity.DealMessage">
+        select m.*, u.nickname as senderNickname, r.nickname as receiverNickname
+        from deal_message m
+        left join `user` u on m.sender_id = u.id
+        left join `user` r on m.receiver_id = r.id
+        where m.deal_id = #{dealId}
+        order by m.created_at asc, m.id asc
+    </select>
+
+    <update id="markReadByDeal">
+        update deal_message set is_read = 1
+        where deal_id = #{dealId} and receiver_id = #{receiverId} and is_read = 0
+    </update>
+
+    <select id="countUnread" resultType="int">
+        select count(*) from deal_message where receiver_id = #{userId} and is_read = 0
+    </select>
+
+</mapper>

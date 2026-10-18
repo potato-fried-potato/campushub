@@ -18,4 +18,7 @@ public interface ReviewMapper {
 
     Map<String, Object> summary(@Param("userId") Long userId);
 
+    // 我发出的评价
+    List<Review> listByReviewer(@Param("userId") Long userId);
+
 }

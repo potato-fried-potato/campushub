@@ -131,6 +131,10 @@ public class MessageService {
         return messageMapper.markRead(id, userId) > 0;
     }
 
+    public void markItemRead(Long itemId, Long userId) {
+        messageMapper.markReadByItem(itemId, userId);
+    }
+
     private Map<String, Object> sender(ItemMessage m) {
         Map<String, Object> sender = new HashMap<>();
         sender.put("id", m.getSenderId());

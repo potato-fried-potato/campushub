@@ -1,8 +1,12 @@
 @echo off
-chcp 65001 >nul
-echo 正在释放 8080 端口...
+setlocal
+set FOUND=0
+echo Stopping CampusHub backend ...
 for /f "tokens=5" %%p in ('netstat -ano ^| findstr ":8080" ^| findstr "LISTENING"') do (
-  taskkill /F /PID %%p >nul 2>&1
+  echo   killing PID=%%p
+  taskkill /F /T /PID %%p >nul 2>&1
+  set FOUND=1
 )
-echo 已停止 CampusHub 后端。
+taskkill /F /FI "WINDOWTITLE eq CampusHub Backend*" >nul 2>&1
+if "%FOUND%"=="1" (echo CampusHub backend stopped.) else (echo No process is using port 8080.)
 pause

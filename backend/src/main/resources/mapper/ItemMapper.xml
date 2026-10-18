@@ -6,12 +6,12 @@
     <!-- 列表和详情都要用的公共字段 -->
     <sql id="itemColumns">
         select i.*, u.nickname as sellerName,
-               u.student_no as sellerStudentNo, u.phone as sellerPhone,
+               u.student_no as sellerStudentNo,
                c.name as categoryName,
                (select img.image_data from item_image img
                 where img.item_id = i.id order by img.sort_no limit 1) as coverImage,
-               exists(select 1 from reservation r
-                      where r.item_id = i.id and r.status = 'CONFIRMED') as reserved
+               exists(select 1 from deal d
+                      where d.item_id = i.id and d.status = 'PENDING') as reserved
         from item i
         left join `user` u on i.seller_id = u.id
         left join category c on i.category_id = c.id
@@ -93,12 +93,30 @@
     </update>
 
     <select id="getSellerRating" resultType="java.util.Map">
-        select ifnull(round(avg(rating), 1), 0) as avgRating, count(*) as reviewCount
+        select ifnull(round(avg(rating), 1), 0) as avgRating,
+               count(*) as reviewCount,
+               ifnull(sum(rating - 3), 0) as ratingDelta
         from review where target_id = #{sellerId}
     </select>
 
     <update id="updateStatus">
         update item set status = #{status}, updated_at = now() where id = #{id}
+    </update>
+
+    <!-- 交易单完成：置为已售并写入成交快照（AC-10.6） -->
+    <update id="markSold">
+        update item
+           set status = 'SOLD', sold_buyer_id = #{buyerId}, sold_price = #{dealPrice},
+               sold_at = now(), updated_at = now()
+         where id = #{id}
+    </update>
+
+    <!-- 卖家线下已售：无交易单、无成交买家，因此不可评价（AC-11.6） -->
+    <update id="markOfflineSold">
+        update item
+           set status = 'SOLD', sold_buyer_id = null, sold_price = null, sold_at = null,
+               updated_at = now()
+         where id = #{id}
     </update>
 
     <insert id="insertItem" parameterType="com.campushub.entity.Item" useGeneratedKeys="true" keyProperty="id">

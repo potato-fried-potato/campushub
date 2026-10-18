@@ -17,6 +17,8 @@ public class Review {
 
     // 联表字段
     private String reviewerNickname;
+    private String itemTitle;
+    private String targetNickname;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -34,4 +36,8 @@ public class Review {
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public String getReviewerNickname() { return reviewerNickname; }
     public void setReviewerNickname(String reviewerNickname) { this.reviewerNickname = reviewerNickname; }
+    public String getItemTitle() { return itemTitle; }
+    public void setItemTitle(String itemTitle) { this.itemTitle = itemTitle; }
+    public String getTargetNickname() { return targetNickname; }
+    public void setTargetNickname(String targetNickname) { this.targetNickname = targetNickname; }
 }

@@ -52,8 +52,9 @@ public class ItemController {
 
     // 商品详情（AC-3.1 ~ 3.5，每次访问浏览量 +1）
     @GetMapping("/{id}")
-    public Result detail(@PathVariable("id") Long id) {
-        Map<String, Object> data = itemService.getItemDetail(id);
+    public Result detail(@PathVariable("id") Long id, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        Map<String, Object> data = itemService.getItemDetail(id, userId);
         if (data == null) {
             return Result.fail(4004, "商品不存在");
         }

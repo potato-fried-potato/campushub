@@ -21,8 +21,19 @@
     </select>
 
     <select id="summary" resultType="java.util.Map">
-        select ifnull(round(avg(rating), 1), 0) as avgRating, count(*) as reviewCount
+        select ifnull(round(avg(rating), 1), 0) as avgRating,
+               count(*) as reviewCount,
+               ifnull(sum(rating - 3), 0) as ratingDelta
         from review where target_id = #{userId}
+    </select>
+
+    <select id="listByReviewer" resultType="com.campushub.entity.Review">
+        select r.*, i.title as itemTitle, u.nickname as targetNickname
+        from review r
+        left join item i on r.item_id = i.id
+        left join `user` u on r.target_id = u.id
+        where r.reviewer_id = #{userId}
+        order by r.created_at desc
     </select>
 
 </mapper>

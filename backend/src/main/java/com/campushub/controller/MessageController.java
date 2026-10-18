@@ -36,4 +36,12 @@ public class MessageController {
         }
         return Result.success(null);
     }
+
+    // 按商品把收到的留言全部标记已读（交易中心用）
+    @PatchMapping("/item/{itemId}/read")
+    public Result readByItem(@PathVariable("itemId") Long itemId, HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        messageService.markItemRead(itemId, userId);
+        return Result.success(null);
+    }
 }

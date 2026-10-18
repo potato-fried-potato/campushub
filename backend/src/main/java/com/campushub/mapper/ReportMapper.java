@@ -25,4 +25,7 @@ public interface ReportMapper {
                      @Param("status") String status,
                      @Param("handledBy") Long handledBy);
 
+    // 我提交的举报
+    List<Report> listByReporter(@Param("userId") Long userId);
+
 }

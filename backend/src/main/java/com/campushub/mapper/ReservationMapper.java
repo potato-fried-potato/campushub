@@ -27,4 +27,7 @@ public interface ReservationMapper {
 
     int closeActiveByItem(@Param("itemId") Long itemId);
 
+    // 关闭同商品其他进行中预约（保留指定的一条）
+    int closeOthersByItem(@Param("itemId") Long itemId, @Param("exceptId") Long exceptId);
+
 }

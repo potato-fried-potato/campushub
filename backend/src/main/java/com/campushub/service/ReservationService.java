@@ -6,6 +6,7 @@ import com.campushub.mapper.ItemMapper;
 import com.campushub.mapper.ReservationMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -19,6 +20,9 @@ public class ReservationService {
 
     @Autowired
     private ItemMapper itemMapper;
+
+    @Autowired
+    private DealService dealService;
 
     public Map<String, Object> create(Long userId, Map<String, Object> body) {
         Map<String, Object> result = new HashMap<>();
@@ -36,8 +40,8 @@ public class ReservationService {
         if (!"ON_SALE".equals(item.getStatus())) {
             return error(result, 4005, "商品当前不可预约");
         }
-        if (reservationMapper.hasConfirmed(itemId) > 0) {
-            return error(result, 4005, "商品已被其他买家锁定");
+        if (dealService.hasActiveDeal(itemId)) {
+            return error(result, 4005, "商品已有待成交交易单，暂不可预约");
         }
         if (reservationMapper.hasActive(itemId, userId) > 0) {
             return error(result, 4005, "你已有一个进行中的预约");
@@ -61,6 +65,7 @@ public class ReservationService {
         return data;
     }
 
+    @Transactional
     public int confirm(Long id, Long userId) {
         Reservation reservation = reservationMapper.getById(id);
         if (reservation == null) {
@@ -76,10 +81,16 @@ public class ReservationService {
         if (item == null || !"ON_SALE".equals(item.getStatus())) {
             return 4005;
         }
-        if (reservationMapper.hasConfirmed(reservation.getItemId()) > 0) {
+        if (dealService.hasActiveDeal(reservation.getItemId())) {
             return 4005;
         }
         reservationMapper.updateStatus(id, "CONFIRMED");
+        // 生成待成交交易单：驳回其他出价、关闭其他预约，商品锁定（AC-10.3）
+        int code = dealService.createFromReservation(item, reservation.getBuyerId(),
+                item.getPrice(), id);
+        if (code != 0) {
+            throw new IllegalStateException("生成交易单失败");
+        }
         return 0;
     }
 

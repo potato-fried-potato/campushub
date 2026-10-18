@@ -34,4 +34,10 @@ public class ReviewController {
     public Result list(@PathVariable("userId") Long userId) {
         return Result.success(reviewService.listByUser(userId));
     }
+
+    // 我发出的评价与待评价商品
+    @GetMapping("/reviews/mine")
+    public Result mine(HttpServletRequest request) {
+        return Result.success(reviewService.listMine((Long) request.getAttribute("userId")));
+    }
 }

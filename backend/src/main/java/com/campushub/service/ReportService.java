@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -52,6 +53,11 @@ public class ReportService {
     private boolean isValidReason(String reason) {
         return "FAKE".equals(reason) || "ILLEGAL".equals(reason)
                 || "SCAM".equals(reason) || "OTHER".equals(reason);
+    }
+
+    // 我提交的举报与处理结果
+    public List<Report> listMine(Long userId) {
+        return reportMapper.listByReporter(userId);
     }
 
     private Map<String, Object> error(Map<String, Object> result, int code, String message) {

@@ -1,9 +1,12 @@
 package com.campushub.service;
 
+import com.campushub.entity.Deal;
 import com.campushub.entity.Item;
 import com.campushub.entity.User;
+import com.campushub.mapper.DealMapper;
 import com.campushub.mapper.ItemMapper;
 import com.campushub.mapper.ReservationMapper;
+import com.campushub.mapper.ReviewMapper;
 import com.campushub.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,12 @@ public class ItemService {
 
     @Autowired
     private ReservationMapper reservationMapper;
+
+    @Autowired
+    private DealMapper dealMapper;
+
+    @Autowired
+    private ReviewMapper reviewMapper;
 
     /**
      * 集市列表：筛选 + 排序 + 分页（AC-2.1 ~ 2.5）
@@ -68,7 +77,7 @@ public class ItemService {
      * 商品详情：多图 + 卖家名片，每次访问浏览量 +1（AC-3.1 ~ 3.5）
      * 商品不存在返回 null，由 Controller 转成 4004
      */
-    public Map<String, Object> getItemDetail(Long itemId) {
+    public Map<String, Object> getItemDetail(Long itemId, Long currentUserId) {
         Item item = itemMapper.getItemById(itemId);
         if (item == null) {
             return null;
@@ -81,9 +90,11 @@ public class ItemService {
         seller.put("id", item.getSellerId());
         seller.put("nickname", item.getSellerName());
         seller.put("studentNo", item.getSellerStudentNo());
-        seller.put("phone", item.getSellerPhone());
         seller.put("avgRating", rating == null ? 0 : rating.get("avgRating"));
         seller.put("reviewCount", rating == null ? 0 : rating.get("reviewCount"));
+        int delta = rating == null || rating.get("ratingDelta") == null
+                ? 0 : ((Number) rating.get("ratingDelta")).intValue();
+        seller.put("creditScore", Math.max(0, Math.min(100, 80 + delta * 5)));
 
         Map<String, Object> data = new HashMap<>();
         data.put("id", item.getId());
@@ -91,6 +102,8 @@ public class ItemService {
         data.put("description", item.getDescription());
         data.put("price", item.getPrice());
         data.put("originalPrice", item.getOriginalPrice());
+        // 砍价下限：挂牌价 8 折，与 BargainService 的下限校验保持一致（AC-6.1）
+        data.put("bargainFloor", BargainService.floorPrice(item.getPrice()));
         data.put("conditionLevel", item.getConditionLevel());
         data.put("campus", item.getCampus());
         data.put("status", item.getStatus());
@@ -101,6 +114,26 @@ public class ItemService {
         data.put("images", itemMapper.getItemImages(itemId));
         data.put("seller", seller);
         data.put("createdAt", item.getCreatedAt());
+        // 当前用户与该交易的关系，前端据此决定显示哪些操作（AC-10.3 / 11.1）
+        Deal activeDeal = dealMapper.getActiveByItem(itemId);
+        Deal completedDeal = dealMapper.getCompletedByItem(itemId);
+        Deal refDeal = activeDeal != null ? activeDeal : completedDeal;
+        boolean isSeller = currentUserId != null && currentUserId.equals(item.getSellerId());
+        boolean isBuyer = currentUserId != null && refDeal != null
+                && currentUserId.equals(refDeal.getBuyerId());
+        data.put("isSeller", isSeller);
+        data.put("isBuyer", isBuyer);
+        data.put("dealId", refDeal == null ? null : refDeal.getId());
+        data.put("dealStatus", refDeal == null ? null : refDeal.getStatus());
+        data.put("dealSource", refDeal == null ? null : refDeal.getSource());
+        data.put("dealPrice", completedDeal == null ? null : completedDeal.getDealPrice());
+        // 已完成交易单的双方各可评价一次，评过就不再显示入口（AC-11.1）
+        boolean canReview = completedDeal != null && (isSeller || isBuyer)
+                && reviewMapper.exists(itemId, currentUserId) == 0;
+        data.put("canReview", canReview);
+        data.put("canDirectBuy", currentUserId != null && !isSeller
+                && "ON_SALE".equals(item.getStatus()) && activeDeal == null);
+        data.put("canReport", currentUserId != null && !isSeller && "ON_SALE".equals(item.getStatus()));
         return data;
     }
 
@@ -126,7 +159,7 @@ public class ItemService {
             return error(4001, "成色参数不合法");
         }
         String campus = str(body.get("campus"));
-        if (!"MAIN".equals(campus) && !"NANHU".equals(campus) && !"WEST".equals(campus)) {
+        if (!"DONGFENG".equals(campus) && !"KEXUE".equals(campus)) {
             return error(4001, "校区参数不合法");
         }
         Object imagesObj = body.get("images");
@@ -233,13 +266,27 @@ public class ItemService {
         if (!owner && !admin) {
             return 4003;
         }
+        // 待成交交易单锁定期间卖家不可手动改状态（AC-5.2）；
+        // 管理员强制下架时同步取消交易单，避免出现悬挂的 PENDING 单。
+        Deal activeDeal = dealMapper.getActiveByItem(itemId);
+        if (activeDeal != null) {
+            if (!admin || !"OFF_SHELF".equals(targetStatus)) {
+                return 4005;
+            }
+            dealMapper.cancel(activeDeal.getId());
+            if ("RESERVATION".equals(activeDeal.getSource()) && activeDeal.getSourceId() != null) {
+                reservationMapper.updateStatus(activeDeal.getSourceId(), "CLOSED");
+            }
+        }
         if (!canChangeStatus(item.getStatus(), targetStatus)) {
             return 4005;
         }
-        itemMapper.updateStatus(itemId, targetStatus);
         if ("SOLD".equals(targetStatus)) {
-            // 商品成交后关闭进行中的预约（AC-10.5）
+            // 卖家线下已售：无交易单、无成交买家，因此不可评价（AC-5.4 / 11.6）
+            itemMapper.markOfflineSold(itemId);
             reservationMapper.closeActiveByItem(itemId);
+        } else {
+            itemMapper.updateStatus(itemId, targetStatus);
         }
         return 0;
     }

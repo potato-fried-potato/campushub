@@ -26,6 +26,13 @@ public class AuthInterceptor implements HandlerInterceptor {
                 request.setAttribute("studentNo", claims.get("studentNo"));
             }
         }
+        // 管理端与用户端分开：管理员账号只做后台管理，不参与用户侧的交易活动
+        if (isAdminBlocked(request)) {
+            response.setStatus(200);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"code\":4003,\"message\":\"管理员账号仅用于后台管理，不参与用户交易活动\",\"data\":null}");
+            return false;
+        }
         if (isAnonymous(request) || request.getAttribute("userId") != null) {
             return true;
         }
@@ -33,6 +40,19 @@ public class AuthInterceptor implements HandlerInterceptor {
         response.setContentType("application/json;charset=UTF-8");
         response.getWriter().write("{\"code\":401,\"message\":\"未登录或登录已过期\",\"data\":null}");
         return false;
+    }
+
+    // 管理员可用：认证接口、管理接口，以及只读浏览；其余用户侧写操作一律拒绝
+    private boolean isAdminBlocked(HttpServletRequest request) {
+        if (!"ADMIN".equals(String.valueOf(request.getAttribute("role")))) {
+            return false;
+        }
+        String uri = request.getRequestURI();
+        if (uri.startsWith("/api/admin") || uri.startsWith("/api/auth")) {
+            return false;
+        }
+        String method = request.getMethod();
+        return !("GET".equals(method) || "HEAD".equals(method) || "OPTIONS".equals(method));
     }
 
     // 匿名接口：注册登录、分类统计、商品浏览、商品留言、用户评价

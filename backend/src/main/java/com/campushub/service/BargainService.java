@@ -25,6 +25,9 @@ public class BargainService {
     @Autowired
     private ReservationMapper reservationMapper;
 
+    @Autowired
+    private DealService dealService;
+
     public Map<String, Object> create(Long userId, Map<String, Object> body) {
         Map<String, Object> result = new HashMap<>();
         Long itemId = toLong(body.get("itemId"));
@@ -42,8 +45,16 @@ public class BargainService {
         if (!"ON_SALE".equals(item.getStatus())) {
             return error(result, 4005, "商品当前不可出价");
         }
+        if (dealService.hasActiveDeal(itemId)) {
+            return error(result, 4005, "商品已有待成交交易单，暂不可出价");
+        }
         if (offerPrice.compareTo(item.getPrice()) >= 0) {
             return error(result, 4001, "出价必须低于挂牌价");
+        }
+        BigDecimal floor = floorPrice(item.getPrice());
+        if (offerPrice.compareTo(floor) < 0) {
+            return error(result, 4001, "出价不能低于挂牌价的 8 折（最低 ￥"
+                    + floor.stripTrailingZeros().toPlainString() + "）");
         }
         if (bargainMapper.getPendingByItemAndBuyer(itemId, userId) != null) {
             return error(result, 4005, "你已有一个待处理出价");
@@ -83,10 +94,15 @@ public class BargainService {
         if (item == null || !"ON_SALE".equals(item.getStatus())) {
             return 4005;
         }
+        if (dealService.hasActiveDeal(bargain.getItemId())) {
+            return 4005;
+        }
         bargainMapper.updateStatus(id, "ACCEPTED");
-        bargainMapper.rejectOthers(bargain.getItemId(), id);
-        itemMapper.updateStatus(bargain.getItemId(), "SOLD");
-        reservationMapper.closeActiveByItem(bargain.getItemId());
+        // 生成待成交交易单：驳回其他出价、关闭进行中预约，商品锁定（AC-6.4）
+        int code = dealService.createFromBargain(item, bargain.getBuyerId(), bargain.getOfferPrice(), id);
+        if (code != 0) {
+            throw new IllegalStateException("生成交易单失败");
+        }
         return 0;
     }
 
@@ -124,6 +140,13 @@ public class BargainService {
         result.put("errorCode", code);
         result.put("message", message);
         return result;
+    }
+
+    /**
+     * 砍价下限：挂牌价的 80%（8 折），保留两位小数（AC-6.1）
+     */
+    public static BigDecimal floorPrice(BigDecimal price) {
+        return price.multiply(new BigDecimal("0.8")).setScale(2, java.math.RoundingMode.HALF_UP);
     }
 
     private Long toLong(Object value) {

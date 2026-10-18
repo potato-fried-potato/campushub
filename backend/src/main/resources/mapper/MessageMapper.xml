@@ -41,4 +41,8 @@
         update item_message set is_read = 1 where id = #{id} and receiver_id = #{receiverId}
     </update>
 
+    <update id="markReadByItem">
+        update item_message set is_read = 1 where item_id = #{itemId} and receiver_id = #{receiverId}
+    </update>
+
 </mapper>

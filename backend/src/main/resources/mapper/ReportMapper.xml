@@ -40,4 +40,12 @@
         where id = #{id}
     </update>
 
+    <select id="listByReporter" resultType="com.campushub.entity.Report">
+        select r.*, i.title as itemTitle
+        from report r
+        left join item i on r.item_id = i.id
+        where r.reporter_id = #{userId}
+        order by r.created_at desc
+    </select>
+
 </mapper>

@@ -61,4 +61,9 @@
         where item_id = #{itemId} and status in ('PENDING', 'CONFIRMED')
     </update>
 
+    <update id="closeOthersByItem">
+        update reservation set status = 'CLOSED', handled_at = now()
+        where item_id = #{itemId} and id != #{exceptId} and status in ('PENDING', 'CONFIRMED')
+    </update>
+
 </mapper>

@@ -54,6 +54,14 @@ public interface ItemMapper {
     // 更新商品状态
     int updateStatus(@Param("id") Long id, @Param("status") String status);
 
+    // 交易单完成：置为已售并写入成交快照
+    int markSold(@Param("id") Long id,
+                 @Param("buyerId") Long buyerId,
+                 @Param("dealPrice") java.math.BigDecimal dealPrice);
+
+    // 卖家线下已售：清空成交快照（不可评价）
+    int markOfflineSold(@Param("id") Long id);
+
     // 发布商品
     int insertItem(Item item);
 

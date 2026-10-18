@@ -1,5 +1,4 @@
 @echo off
-chcp 65001 >nul
 setlocal
 cd /d %~dp0
 
@@ -8,38 +7,35 @@ set DB_PASS=123456
 set MYSQL=C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe
 if not exist "%MYSQL%" set MYSQL=mysql
 
-echo [1/6] 检查 JDK 21...
-java -version 2>&1 | findstr "21." >nul
-if errorlevel 1 goto nojava
+echo [1/6] Checking JDK 21 ...
+set JAVA_OK=0
+if exist "%JAVA_HOME%\bin\java.exe" call :checkjava "%JAVA_HOME%\bin\java.exe"
+if "%JAVA_OK%"=="0" call :checkjava java
+if "%JAVA_OK%"=="0" goto nojava
 
-echo [2/6] 检查 MySQL80 服务...
+echo [2/6] Checking MySQL service ...
 sc query MySQL80 | findstr "RUNNING" >nul
-if errorlevel 1 (
-  echo 尝试启动 MySQL80 服务...
-  net start MySQL80 >nul 2>&1
-)
+if errorlevel 1 net start MySQL80 >nul 2>&1
 "%MYSQL%" -u%DB_USER% -p%DB_PASS% -e "select 1" >nul 2>&1
 if errorlevel 1 goto nomysql
 
-echo [3/6] 检查数据库...
+echo [3/6] Checking database campushub ...
 "%MYSQL%" -u%DB_USER% -p%DB_PASS% -e "use campushub" >nul 2>&1
 if errorlevel 1 (
-  echo 数据库不存在，自动导入 init.sql...
-  "%MYSQL%" -u%DB_USER% -p%DB_PASS% --default-character-set=utf8mb4 -e "source db/init.sql"
-  if errorlevel 1 goto fail
+  echo   Database not found, importing db/init.sql ...
+  call "%~dp0db\init-db.bat" < nul
 )
 
-echo [4/6] 检查前端产物...
+echo [4/6] Checking frontend build ...
 if not exist "backend\src\main\resources\static\index.html" goto buildfront
-for /f %%f in ('dir /b /s frontend\src frontend\index.html frontend\vite.config.js 2^>nul') do (
-  if "%%~tf" GTR "backend\src\main\resources\static\index.html" goto buildfront
-)
+powershell -NoProfile -Command "$n=(Get-ChildItem 'frontend\src','frontend\index.html','frontend\vite.config.js' -Recurse -File | Sort-Object LastWriteTime -Descending | Select-Object -First 1).LastWriteTime; $b=(Get-Item 'backend\src\main\resources\static\index.html').LastWriteTime; if($n -gt $b){exit 1}else{exit 0}"
+if errorlevel 1 goto buildfront
 goto backendbuild
 
 :buildfront
-echo 构建前端...
+echo   Building frontend (npm install + build) ...
 pushd frontend
-call npm install >nul 2>&1
+call npm install
 call npm run build
 if errorlevel 1 (
   popd
@@ -48,7 +44,7 @@ if errorlevel 1 (
 popd
 
 :backendbuild
-echo [5/6] 构建后端...
+echo [5/6] Building backend (mvn package) ...
 pushd backend
 call mvn -q -DskipTests package
 if errorlevel 1 (
@@ -57,24 +53,49 @@ if errorlevel 1 (
 )
 popd
 
-echo [6/6] 启动后端并打开浏览器...
+echo [6/6] Starting backend ...
+netstat -ano | findstr ":8080" | findstr "LISTENING" >nul
+if not errorlevel 1 goto portbusy
 start "CampusHub Backend" cmd /c "cd /d %~dp0backend && mvn spring-boot:run"
-timeout /t 12 /nobreak >nul
+echo   Waiting for backend ready (max 90s) ...
+set TRIES=0
+:waitup
+timeout /t 2 /nobreak >nul
+netstat -ano | findstr ":8080" | findstr "LISTENING" >nul
+if not errorlevel 1 goto up
+set /a TRIES+=1
+if %TRIES% lss 45 goto waitup
+echo   Backend did not start in time. Check the "CampusHub Backend" window log.
+pause
+exit /b 1
+
+:up
 start "" http://localhost:8080
-echo 启动完成：http://localhost:8080
+echo   OK: http://localhost:8080
+echo Done.
 exit /b 0
 
+:portbusy
+echo   Port 8080 is already in use. Please run the stop script first.
+pause
+exit /b 1
+
 :nojava
-echo 未检测到 JDK 21，请先安装 JDK 21 并配置 JAVA_HOME。
+echo   JDK 21 not found. Install JDK 21 and set JAVA_HOME (now: %JAVA_HOME%).
 pause
 exit /b 1
 
 :nomysql
-echo MySQL 无法连接，请检查 MySQL80 服务与 db\init-db.bat 中的账号密码。
+echo   Cannot connect to MySQL. Check the MySQL80 service and the DB_USER / DB_PASS in db\init-db.bat.
 pause
 exit /b 1
 
 :fail
-echo 启动失败，请查看上方日志。
+echo   Build failed, see the log above.
 pause
 exit /b 1
+
+:checkjava
+"%~1" -version 2>&1 | findstr "21." >nul
+if not errorlevel 1 set JAVA_OK=1
+goto :eof

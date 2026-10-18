@@ -18,6 +18,9 @@ backend/target/
 frontend/node_modules/
 node_modules/
 frontend/dist/
+# 前端构建产物（由 npm run build 生成，后端直接托管，不入库）
+/backend/src/main/resources/static/*
+!/backend/src/main/resources/static/.gitkeep
 # 误在仓库根执行 npm install 产生的文件，不入库（前端依赖在 frontend/）
 /package.json
 /package-lock.json

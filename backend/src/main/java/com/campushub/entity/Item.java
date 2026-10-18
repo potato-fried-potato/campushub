@@ -19,13 +19,15 @@ public class Item {
     private String campus;
     private String status;
     private Integer viewCount;
+    private Long soldBuyerId;
+    private BigDecimal soldPrice;
+    private LocalDateTime soldAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     // 联表查出来的，不是数据库字段
     private String sellerName;
     private String sellerStudentNo;
-    private String sellerPhone;
     private String categoryName;
     private String coverImage;
     private Boolean reserved;
@@ -118,6 +120,30 @@ public class Item {
         this.viewCount = viewCount;
     }
 
+    public Long getSoldBuyerId() {
+        return soldBuyerId;
+    }
+
+    public void setSoldBuyerId(Long soldBuyerId) {
+        this.soldBuyerId = soldBuyerId;
+    }
+
+    public BigDecimal getSoldPrice() {
+        return soldPrice;
+    }
+
+    public void setSoldPrice(BigDecimal soldPrice) {
+        this.soldPrice = soldPrice;
+    }
+
+    public LocalDateTime getSoldAt() {
+        return soldAt;
+    }
+
+    public void setSoldAt(LocalDateTime soldAt) {
+        this.soldAt = soldAt;
+    }
+
     public String getSellerName() {
         return sellerName;
     }
@@ -134,13 +160,6 @@ public class Item {
         this.sellerStudentNo = sellerStudentNo;
     }
 
-    public String getSellerPhone() {
-        return sellerPhone;
-    }
-
-    public void setSellerPhone(String sellerPhone) {
-        this.sellerPhone = sellerPhone;
-    }
 
     public String getCategoryName() {
         return categoryName;
