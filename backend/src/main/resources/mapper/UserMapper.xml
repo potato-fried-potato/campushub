@@ -20,4 +20,32 @@
         update `user` set password = #{password} where id = #{id}
     </update>
 
+    <select id="listForAdmin" resultType="com.campushub.entity.User">
+        select * from `user`
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (student_no like concat('%', #{keyword}, '%')
+                     or nickname like concat('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by id
+        limit #{offset}, #{pageSize}
+    </select>
+
+    <select id="countForAdmin" resultType="int">
+        select count(*) from `user`
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (student_no like concat('%', #{keyword}, '%')
+                     or nickname like concat('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+    </select>
+
+    <update id="updateStatus">
+        update `user` set status = #{status} where id = #{id}
+    </update>
+
 </mapper>
