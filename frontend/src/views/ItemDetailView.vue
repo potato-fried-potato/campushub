@@ -38,10 +38,82 @@
         <el-button type="primary" @click="copyPhone">复制联系方式</el-button>
       </div>
 
+      <div class="actions" v-if="user">
+        <template v-if="!isOwner && item.status === 'ON_SALE'">
+          <el-button type="danger" @click="bargainVisible = true">出价</el-button>
+          <el-button @click="reservationVisible = true">预约</el-button>
+        </template>
+        <el-button v-if="!isOwner" @click="reportVisible = true">举报</el-button>
+        <el-button v-if="item.status === 'SOLD'" @click="reviewVisible = true">评价交易</el-button>
+      </div>
+
       <div class="safety">
         交易安全提示：请在校内当面验货交易，不要提前转账或点击陌生链接付款。
       </div>
     </div>
+
+    <div class="messages">
+      <h3>商品留言</h3>
+      <div class="topic" v-for="t in messages" :key="t.id">
+        <div class="topic-line">
+          <span class="who">{{ t.sender.nickname }}</span>：{{ t.content }}
+          <span class="time">{{ t.createdAt }}</span>
+        </div>
+        <div class="reply" v-for="r in t.replies" :key="r.id">
+          <span class="who">{{ r.sender.nickname }}</span>：{{ r.content }}
+        </div>
+        <el-button v-if="user" link type="primary" @click="replyTo = t.id">回复</el-button>
+      </div>
+      <div class="empty-msg" v-if="messages.length === 0">还没有留言</div>
+      <div class="post-box" v-if="user">
+        <el-input v-model="messageContent" placeholder="留言（1~200 字）" maxlength="200" />
+        <el-button type="primary" @click="postMessage">发送</el-button>
+        <el-button v-if="replyTo" @click="replyTo = null">取消回复</el-button>
+      </div>
+    </div>
+
+    <el-dialog v-model="bargainVisible" title="出价" width="360px">
+      <el-input v-model="bargainPrice" placeholder="出价（需低于挂牌价）" class="dialog-item" />
+      <el-input v-model="bargainMessage" placeholder="留言（选填）" class="dialog-item" />
+      <template #footer>
+        <el-button @click="bargainVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitBargain">提交出价</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="reservationVisible" title="意向预约" width="380px">
+      <el-input v-model="expectTime" placeholder="期望交易时间，如 2026-11-01T15:00:00" class="dialog-item" />
+      <el-input v-model="reservationRemark" placeholder="备注（选填）" class="dialog-item" />
+      <template #footer>
+        <el-button @click="reservationVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitReservation">提交预约</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="reportVisible" title="举报商品" width="380px">
+      <el-select v-model="reportReason" placeholder="举报原因" class="dialog-item">
+        <el-option label="虚假信息" value="FAKE" />
+        <el-option label="违禁物品" value="ILLEGAL" />
+        <el-option label="诈骗风险" value="SCAM" />
+        <el-option label="其他" value="OTHER" />
+      </el-select>
+      <el-input v-model="reportDetail" placeholder="补充说明（选填）" class="dialog-item" />
+      <template #footer>
+        <el-button @click="reportVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitReport">提交举报</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="reviewVisible" title="评价交易" width="380px">
+      <el-select v-model="reviewRating" class="dialog-item">
+        <el-option v-for="n in 5" :key="n" :label="n + ' 星'" :value="n" />
+      </el-select>
+      <el-input v-model="reviewContent" type="textarea" :rows="3" placeholder="评价内容（选填）" class="dialog-item" />
+      <template #footer>
+        <el-button @click="reviewVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitReview">提交评价</el-button>
+      </template>
+    </el-dialog>
   </div>
   <div class="empty" v-else>商品不存在或已下架</div>
 </template>
@@ -54,7 +126,23 @@ export default {
   data() {
     return {
       item: null,
-      imageIndex: 0
+      imageIndex: 0,
+      user: JSON.parse(localStorage.getItem('user') || 'null'),
+      messages: [],
+      messageContent: '',
+      replyTo: null,
+      bargainVisible: false,
+      bargainPrice: '',
+      bargainMessage: '',
+      reservationVisible: false,
+      expectTime: '',
+      reservationRemark: '',
+      reportVisible: false,
+      reportReason: 'FAKE',
+      reportDetail: '',
+      reviewVisible: false,
+      reviewRating: 5,
+      reviewContent: ''
     }
   },
   computed: {
@@ -71,10 +159,14 @@ export default {
       }
       const save = Number(this.item.originalPrice) - Number(this.item.price)
       return save > 0 ? save.toFixed(2) : 0
+    },
+    isOwner() {
+      return this.user && this.item && this.user.id === this.item.seller.id
     }
   },
   created() {
     this.loadDetail()
+    this.loadMessages()
   },
   methods: {
     loadDetail() {
@@ -96,6 +188,87 @@ export default {
       } else {
         this.$message.info('联系电话：' + phone)
       }
+    },
+    loadMessages() {
+      axios.get('/api/items/' + this.$route.params.id + '/messages').then(res => {
+        if (res.data.code === 0) {
+          this.messages = res.data.data
+        }
+      })
+    },
+    postMessage() {
+      if (this.messageContent.trim() === '') {
+        this.$message.warning('留言内容不能为空')
+        return
+      }
+      axios.post('/api/items/' + this.item.id + '/messages', {
+        content: this.messageContent,
+        parentId: this.replyTo
+      }).then(res => {
+        if (res.data.code === 0) {
+          this.messageContent = ''
+          this.replyTo = null
+          this.loadMessages()
+        } else {
+          this.$message.error(res.data.message)
+        }
+      })
+    },
+    submitBargain() {
+      axios.post('/api/bargains', {
+        itemId: this.item.id,
+        offerPrice: this.bargainPrice,
+        message: this.bargainMessage
+      }).then(res => {
+        if (res.data.code === 0) {
+          this.bargainVisible = false
+          this.$message.success('出价已提交')
+        } else {
+          this.$message.error(res.data.message)
+        }
+      })
+    },
+    submitReservation() {
+      axios.post('/api/reservations', {
+        itemId: this.item.id,
+        expectTime: this.expectTime || null,
+        remark: this.reservationRemark
+      }).then(res => {
+        if (res.data.code === 0) {
+          this.reservationVisible = false
+          this.$message.success('预约已提交')
+        } else {
+          this.$message.error(res.data.message)
+        }
+      })
+    },
+    submitReport() {
+      axios.post('/api/reports', {
+        itemId: this.item.id,
+        reason: this.reportReason,
+        detail: this.reportDetail
+      }).then(res => {
+        if (res.data.code === 0) {
+          this.reportVisible = false
+          this.$message.success('举报已提交')
+        } else {
+          this.$message.error(res.data.message)
+        }
+      })
+    },
+    submitReview() {
+      axios.post('/api/reviews', {
+        itemId: this.item.id,
+        rating: this.reviewRating,
+        content: this.reviewContent
+      }).then(res => {
+        if (res.data.code === 0) {
+          this.reviewVisible = false
+          this.$message.success('评价已提交')
+        } else {
+          this.$message.error(res.data.message)
+        }
+      })
     },
     campusText(campus) {
       if (campus === 'MAIN') {
@@ -239,6 +412,65 @@ export default {
 
 .seller-box .el-button {
   margin-top: 10px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.messages {
+  width: 100%;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 6px;
+}
+
+.messages h3 {
+  margin: 0 0 10px;
+}
+
+.topic {
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.topic-line {
+  font-size: 14px;
+}
+
+.who {
+  font-weight: bold;
+}
+
+.time {
+  margin-left: 8px;
+  color: #999;
+  font-size: 12px;
+}
+
+.reply {
+  margin: 6px 0 0 16px;
+  color: #555;
+  font-size: 13px;
+}
+
+.empty-msg {
+  color: #999;
+  font-size: 13px;
+}
+
+.post-box {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.dialog-item {
+  margin-bottom: 12px;
 }
 
 .safety {
