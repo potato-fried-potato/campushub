@@ -101,4 +101,38 @@
         update item set status = #{status}, updated_at = now() where id = #{id}
     </update>
 
+    <insert id="insertItem" parameterType="com.campushub.entity.Item" useGeneratedKeys="true" keyProperty="id">
+        insert into item (seller_id, category_id, title, description, price, original_price,
+                          condition_level, campus, status, view_count)
+        values (#{sellerId}, #{categoryId}, #{title}, #{description}, #{price}, #{originalPrice},
+                #{conditionLevel}, #{campus}, 'ON_SALE', 0)
+    </insert>
+
+    <insert id="insertImage">
+        insert into item_image (item_id, image_data, sort_no)
+        values (#{itemId}, #{imageData}, #{sortNo})
+    </insert>
+
+    <select id="adminList" resultType="com.campushub.entity.Item">
+        <include refid="itemColumns"/>
+        <where>
+            <if test="status != null and status != ''">and i.status = #{status}</if>
+            <if test="keyword != null and keyword != ''">
+                and i.title like concat('%', #{keyword}, '%')
+            </if>
+        </where>
+        order by i.created_at desc
+        limit #{offset}, #{pageSize}
+    </select>
+
+    <select id="adminCount" resultType="int">
+        select count(*) from item i
+        <where>
+            <if test="status != null and status != ''">and i.status = #{status}</if>
+            <if test="keyword != null and keyword != ''">
+                and i.title like concat('%', #{keyword}, '%')
+            </if>
+        </where>
+    </select>
+
 </mapper>

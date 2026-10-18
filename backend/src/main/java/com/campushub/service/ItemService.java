@@ -3,10 +3,14 @@ package com.campushub.service;
 import com.campushub.entity.Item;
 import com.campushub.entity.User;
 import com.campushub.mapper.ItemMapper;
+import com.campushub.mapper.ReservationMapper;
 import com.campushub.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +23,9 @@ public class ItemService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private ReservationMapper reservationMapper;
 
     /**
      * 集市列表：筛选 + 排序 + 分页（AC-2.1 ~ 2.5）
@@ -97,6 +104,74 @@ public class ItemService {
         return data;
     }
 
+    /**
+     * 发布商品：参数校验 + 图片 Data URI 直存（AC-4.1 ~ 4.5）
+     */
+    public Map<String, Object> publish(Long userId, Map<String, Object> body) {
+        String title = str(body.get("title"));
+        if (title == null || title.length() < 2 || title.length() > 40) {
+            return error(4001, "标题需为 2~40 字");
+        }
+        Long categoryId = toLong(body.get("categoryId"));
+        if (categoryId == null) {
+            return error(4001, "请选择商品分类");
+        }
+        BigDecimal price = toDecimal(body.get("price"));
+        if (price == null || price.compareTo(BigDecimal.ZERO) <= 0
+                || price.compareTo(new BigDecimal("99999")) > 0) {
+            return error(4001, "价格需大于 0 且不超过 99999");
+        }
+        String condition = str(body.get("conditionLevel"));
+        if (!"NEW".equals(condition) && !"NEARLY_NEW".equals(condition) && !"GOOD".equals(condition)) {
+            return error(4001, "成色参数不合法");
+        }
+        String campus = str(body.get("campus"));
+        if (!"MAIN".equals(campus) && !"NANHU".equals(campus) && !"WEST".equals(campus)) {
+            return error(4001, "校区参数不合法");
+        }
+        Object imagesObj = body.get("images");
+        if (!(imagesObj instanceof List) || ((List<?>) imagesObj).isEmpty()) {
+            return error(4001, "至少上传一张实物照片");
+        }
+        List<String> images = new ArrayList<>();
+        for (Object o : (List<?>) imagesObj) {
+            String img = String.valueOf(o);
+            int index = img.indexOf(";base64,");
+            if (!img.startsWith("data:image/") || index < 0) {
+                return error(4006, "图片格式不合法");
+            }
+            try {
+                byte[] raw = Base64.getDecoder().decode(img.substring(index + 8));
+                if (raw.length > 5L * 1024 * 1024) {
+                    return error(4006, "单张图片不能超过 5MB");
+                }
+            } catch (Exception e) {
+                return error(4006, "图片格式不合法");
+            }
+            images.add(img);
+        }
+
+        Item item = new Item();
+        item.setSellerId(userId);
+        item.setCategoryId(categoryId);
+        item.setTitle(title);
+        item.setDescription(str(body.get("description")));
+        item.setPrice(price);
+        item.setOriginalPrice(toDecimal(body.get("originalPrice")));
+        item.setConditionLevel(condition);
+        item.setCampus(campus);
+        item.setStatus("ON_SALE");
+        item.setViewCount(0);
+        itemMapper.insertItem(item);
+        for (int i = 0; i < images.size(); i++) {
+            itemMapper.insertImage(item.getId(), images.get(i), i);
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", item.getId());
+        return result;
+    }
+
     private Map<String, Object> buildPage(List<Item> list, int total, int page, int size) {
         Map<String, Object> data = new HashMap<>();
         data.put("list", list);
@@ -104,6 +179,37 @@ public class ItemService {
         data.put("pageNum", page);
         data.put("pageSize", size);
         return data;
+    }
+
+    private Map<String, Object> error(int code, String message) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("errorCode", code);
+        result.put("message", message);
+        return result;
+    }
+
+    private String str(Object value) {
+        if (value == null) {
+            return null;
+        }
+        String text = String.valueOf(value).trim();
+        return text.length() == 0 ? null : text;
+    }
+
+    private Long toLong(Object value) {
+        try {
+            return value == null ? null : Long.valueOf(String.valueOf(value));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private BigDecimal toDecimal(Object value) {
+        try {
+            return value == null ? null : new BigDecimal(String.valueOf(value));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -131,6 +237,10 @@ public class ItemService {
             return 4005;
         }
         itemMapper.updateStatus(itemId, targetStatus);
+        if ("SOLD".equals(targetStatus)) {
+            // 商品成交后关闭进行中的预约（AC-10.5）
+            reservationMapper.closeActiveByItem(itemId);
+        }
         return 0;
     }
 

@@ -54,4 +54,20 @@ public interface ItemMapper {
     // 更新商品状态
     int updateStatus(@Param("id") Long id, @Param("status") String status);
 
+    // 发布商品
+    int insertItem(Item item);
+
+    // 保存商品图片
+    int insertImage(@Param("itemId") Long itemId,
+                    @Param("imageData") String imageData,
+                    @Param("sortNo") int sortNo);
+
+    // 管理后台：全部商品
+    List<Item> adminList(@Param("status") String status,
+                         @Param("keyword") String keyword,
+                         @Param("offset") int offset,
+                         @Param("pageSize") int pageSize);
+
+    int adminCount(@Param("status") String status, @Param("keyword") String keyword);
+
 }

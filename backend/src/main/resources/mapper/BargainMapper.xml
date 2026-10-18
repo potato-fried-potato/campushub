@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.campushub.mapper.BargainMapper">
+
+    <insert id="insert" parameterType="com.campushub.entity.Bargain" useGeneratedKeys="true" keyProperty="id">
+        insert into bargain (item_id, buyer_id, offer_price, message, status)
+        values (#{itemId}, #{buyerId}, #{offerPrice}, #{message}, 'PENDING')
+    </insert>
+
+    <select id="getById" resultType="com.campushub.entity.Bargain">
+        select b.*, i.title as itemTitle, i.price as itemPrice, i.seller_id as sellerId,
+               u.nickname as buyerNickname
+        from bargain b
+        left join item i on b.item_id = i.id
+        left join `user` u on b.buyer_id = u.id
+        where b.id = #{id}
+    </select>
+
+    <select id="list" resultType="com.campushub.entity.Bargain">
+        select b.*, i.title as itemTitle, i.price as itemPrice, i.seller_id as sellerId,
+               u.nickname as buyerNickname
+        from bargain b
+        left join item i on b.item_id = i.id
+        left join `user` u on b.buyer_id = u.id
+        <where>
+            <choose>
+                <when test="view == 'sent'">and b.buyer_id = #{userId}</when>
+                <otherwise>and i.seller_id = #{userId}</otherwise>
+            </choose>
+            <if test="status != null and status != ''">and b.status = #{status}</if>
+        </where>
+        order by b.created_at desc
+    </select>
+
+    <select id="countPending" resultType="int">
+        select count(*)
+        from bargain b
+        left join item i on b.item_id = i.id
+        <choose>
+            <when test="view == 'sent'">where b.buyer_id = #{userId}</when>
+            <otherwise>where i.seller_id = #{userId}</otherwise>
+        </choose>
+        and b.status = 'PENDING'
+    </select>
+
+    <update id="updateStatus">
+        update bargain set status = #{status}, handled_at = now() where id = #{id}
+    </update>
+
+    <update id="rejectOthers">
+        update bargain set status = 'REJECTED', handled_at = now()
+        where item_id = #{itemId} and id != #{exceptId} and status = 'PENDING'
+    </update>
+
+    <select id="getAcceptedBuyerId" resultType="long">
+        select buyer_id from bargain
+        where item_id = #{itemId} and status = 'ACCEPTED'
+        order by id desc limit 1
+    </select>
+
+    <select id="getPendingByItemAndBuyer" resultType="long">
+        select id from bargain
+        where item_id = #{itemId} and buyer_id = #{buyerId} and status = 'PENDING'
+        limit 1
+    </select>
+
+</mapper>
