@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.Map;
 
@@ -31,6 +34,9 @@ public class AuthController {
         Map<String, Object> data = userService.login(studentNo.trim(), password);
         if (data == null) {
             return Result.fail(4002, "学号或密码错误");
+        }
+        if (data.containsKey("errorCode")) {
+            return Result.fail(4007, "账号已被禁用");
         }
         return Result.success(data);
     }
@@ -59,6 +65,19 @@ public class AuthController {
             return Result.fail(4005, "学号已被注册");
         }
         return Result.success(data);
+    }
+
+    // 当前登录用户
+    @GetMapping("/me")
+    public Result me(HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        return Result.success(userService.getUserInfo(userId));
+    }
+
+    // JWT 无状态，退出由前端清除 token
+    @PostMapping("/logout")
+    public Result logout() {
+        return Result.success(null);
     }
 
 }

@@ -1,6 +1,7 @@
 package com.campushub.service;
 
 import com.campushub.entity.User;
+import com.campushub.common.JwtUtil;
 import com.campushub.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -10,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 @Service
 public class UserService {
@@ -32,8 +32,12 @@ public class UserService {
         if (!checkPassword(user, password)) {
             return null;
         }
-        // 先随便生成一个 token，后面再换成 JWT
-        String token = UUID.randomUUID().toString().replace("-", "");
+        if ("DISABLED".equals(user.getStatus())) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("errorCode", 4007);
+            return error;
+        }
+        String token = JwtUtil.create(user.getId(), user.getStudentNo(), user.getNickname(), user.getRole());
         user.setPassword(null); // 不要把密码返给前端
         Map<String, Object> data = new HashMap<>();
         data.put("token", token);
@@ -58,8 +62,8 @@ public class UserService {
         user.setStatus("ACTIVE");
         userMapper.insertUser(user);
 
-        // 注册成功直接当登录，返回的 token 先继续用 UUID 占位
-        String token = UUID.randomUUID().toString().replace("-", "");
+        // 注册成功直接当登录
+        String token = JwtUtil.create(user.getId(), user.getStudentNo(), user.getNickname(), user.getRole());
         user.setPassword(null);
         Map<String, Object> data = new HashMap<>();
         data.put("token", token);
@@ -98,6 +102,17 @@ public class UserService {
                 + firstChar + "</text></svg>";
         String base64 = Base64.getEncoder().encodeToString(svg.getBytes(StandardCharsets.UTF_8));
         return "data:image/svg+xml;base64," + base64;
+    }
+
+    /**
+     * 当前登录用户信息，密码不外传
+     */
+    public User getUserInfo(Long userId) {
+        User user = userMapper.getUserById(userId);
+        if (user != null) {
+            user.setPassword(null);
+        }
+        return user;
     }
 
 }
