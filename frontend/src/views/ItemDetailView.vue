@@ -193,7 +193,7 @@
 
     <el-dialog v-model="bargainVisible" title="我要出价" width="420px" align-center>
       <div style="color: var(--text-sub); font-size: 13px; margin-bottom: 10px">
-        挂牌价 ￥{{ item.price }}，可出价 ￥{{ item.bargainFloor }} ~ ￥{{ belowPriceText }}（最低 8 折）
+        挂牌价 ￥{{ item.price }}，可出价 ￥{{ formatMoney(item.bargainFloor) }} ~ ￥{{ belowPriceText }}（最低 8 折）
       </div>
       <div style="display: flex; gap: 8px; margin-bottom: 10px">
         <el-button size="small" @click="fillBargain(0.9)">9 折 ￥{{ discountPrice(0.9) }}</el-button>
@@ -493,6 +493,9 @@ export default {
     discountPrice(rate) {
       if (!this.item) return '0.00'
       return (Number(this.item.price) * rate).toFixed(2)
+    },
+    formatMoney(value) {
+      return Number(value || 0).toFixed(2)
     },
     fillBargain(rate) {
       this.bargainPrice = this.discountPrice(rate)

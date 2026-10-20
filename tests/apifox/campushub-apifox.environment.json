@@ -1,0 +1,12 @@
+{
+  "id": "campushub-apifox-env",
+  "name": "CampusHub 本地环境",
+  "values": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api", "enabled": true },
+    { "key": "sellerNo", "value": "542412320201", "enabled": true },
+    { "key": "buyerNo", "value": "542412310217", "enabled": true },
+    { "key": "adminNo", "value": "admin", "enabled": true },
+    { "key": "password", "value": "123456", "enabled": true }
+  ],
+  "_postman_variable_scope": "environment"
+}

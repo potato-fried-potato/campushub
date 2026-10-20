@@ -114,7 +114,7 @@ test(api): 新增留言断言组 (AC-9.x)
 
 #### 4.1 Pull Request 流程
 
-1. feature 分支开发完成，本地跑通 `mvn test` 与相关 E2E 断言组；
+1. feature 分支开发完成：后端跑通 `mvn test`；接口改动执行 Apifox 集合（`tests/apifox`）或 `tests/api-e2e.ps1` 对应断言组；前端改动执行 `cd frontend && npm test`（Playwright）；
 2. 向 `develop` 发起 Pull Request，按模板填写：**关联 US / AC、变更内容、自测方式、UI 截图（涉及页面时）**；
 3. 至少 1 名成员 Review 通过（前端 ↔ 后端交叉评审：接口改动必须由对端负责人确认契约一致）；
 4. 使用 Squash Merge 合入 `develop`，删除源分支。
@@ -133,9 +133,10 @@ test(api): 新增留言断言组 (AC-9.x)
 
 #### 5.1 合并门禁（必须全部满足）
 
-1. `mvn test` 通过（JUnit 冒烟测试）；
-2. 涉及接口的改动，`tests/api-e2e.ps1` 对应断言组通过（用例清单见 `docs/06`）；
-3. 受影响文档（`docs/01 ~ 06`）同步更新。
+1. `mvn test` 通过（40 项 JUnit 5 + Mockito：启动冒烟 + 核心业务规则）；
+2. 涉及接口的改动：Apifox 全量集合（96 请求 / 117 断言）或 `tests/api-e2e.ps1`（62 项断言）对应断言通过（用例清单见 `docs/06`）；
+3. 涉及页面的改动：`cd frontend && npm test`（Playwright 关键流程）通过；
+4. 受影响文档（`docs/01 ~ 06`）同步更新。
 
 #### 5.2 迭代发布流程
 

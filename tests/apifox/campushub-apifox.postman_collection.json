@@ -1,0 +1,3005 @@
+{
+  "info": {
+    "name": "CampusHub API 全量回归（Apifox 导入）",
+    "description": "覆盖全部接口与关键边界。执行前先 db/init-db.bat 重置种子库。",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080/api"
+    },
+    {
+      "key": "sellerNo",
+      "value": "542412320201"
+    },
+    {
+      "key": "buyerNo",
+      "value": "542412310217"
+    },
+    {
+      "key": "adminNo",
+      "value": "admin"
+    },
+    {
+      "key": "password",
+      "value": "123456"
+    },
+    {
+      "key": "tinyImage",
+      "value": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+    },
+    {
+      "key": "sellerToken",
+      "value": ""
+    },
+    {
+      "key": "buyerToken",
+      "value": ""
+    },
+    {
+      "key": "adminToken",
+      "value": ""
+    },
+    {
+      "key": "newUserId",
+      "value": ""
+    },
+    {
+      "key": "newStudentNo",
+      "value": ""
+    },
+    {
+      "key": "itemA",
+      "value": ""
+    },
+    {
+      "key": "itemB",
+      "value": ""
+    },
+    {
+      "key": "itemC",
+      "value": ""
+    },
+    {
+      "key": "itemD",
+      "value": ""
+    },
+    {
+      "key": "itemE",
+      "value": ""
+    },
+    {
+      "key": "bargainA",
+      "value": ""
+    },
+    {
+      "key": "bargainReject",
+      "value": ""
+    },
+    {
+      "key": "bargainCancel",
+      "value": ""
+    },
+    {
+      "key": "dealA",
+      "value": ""
+    },
+    {
+      "key": "dealB",
+      "value": ""
+    },
+    {
+      "key": "dealC",
+      "value": ""
+    },
+    {
+      "key": "dealD",
+      "value": ""
+    },
+    {
+      "key": "reservation1",
+      "value": ""
+    },
+    {
+      "key": "reservation2",
+      "value": ""
+    },
+    {
+      "key": "reservation3",
+      "value": ""
+    },
+    {
+      "key": "messageId",
+      "value": ""
+    },
+    {
+      "key": "reportId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "00 认证",
+      "item": [
+        {
+          "name": "注册新用户",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentNo\":\"{{newStudentNo}}\",\"password\":\"{{password}}\",\"nickname\":\"Apifox用户\",\"phone\":\"13800001234\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('newStudentNo', 'apifox' + Date.now());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"newUserId\", body.data.user.id);",
+                  "pm.test(\"返回 JWT\", () => pm.expect(body.data.token).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "重复注册被拒",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentNo\":\"{{newStudentNo}}\",\"password\":\"{{password}}\",\"nickname\":\"重复\",\"phone\":\"13800001235\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4005', () => { pm.expect(body.code).to.eql(4005); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "登录-卖家",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentNo\":\"{{sellerNo}}\",\"password\":\"{{password}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"sellerToken\", body.data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "登录-买家",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentNo\":\"{{buyerNo}}\",\"password\":\"{{password}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"buyerToken\", body.data.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "登录-管理员",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentNo\":\"{{adminNo}}\",\"password\":\"{{password}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"adminToken\", body.data.token);",
+                  "pm.test(\"角色为 ADMIN\", () => pm.expect(body.data.user.role).to.eql(\"ADMIN\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "错误密码登录",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentNo\":\"{{sellerNo}}\",\"password\":\"wrong-password\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4002', () => { pm.expect(body.code).to.eql(4002); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "当前用户信息",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/me"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"返回学号\", () => pm.expect(body.data.studentNo).to.be.a(\"string\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "登出",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/logout"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "分类列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/categories"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"6 个分类\", () => pm.expect(body.data.length).to.eql(6));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "平台统计",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/system/stats"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"四项指标\", () => { pm.expect(body.data.onSaleCount).to.be.a(\"number\"); pm.expect(body.data.soldCount).to.be.a(\"number\"); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01 商品",
+      "item": [
+        {
+          "name": "发布商品 itemA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Apifox-itemA-{{$timestamp}}\",\"description\":\"Apifox 全量回归\",\"price\":100,\"originalPrice\":200,\"conditionLevel\":\"NEW\",\"campus\":\"DONGFENG\",\"categoryId\":1,\"images\":[\"{{tinyImage}}\"]}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"itemA\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "发布商品 itemB",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Apifox-itemB-{{$timestamp}}\",\"description\":\"Apifox 全量回归\",\"price\":120,\"originalPrice\":240,\"conditionLevel\":\"NEW\",\"campus\":\"DONGFENG\",\"categoryId\":1,\"images\":[\"{{tinyImage}}\"]}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"itemB\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "发布商品 itemC",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Apifox-itemC-{{$timestamp}}\",\"description\":\"Apifox 全量回归\",\"price\":140,\"originalPrice\":280,\"conditionLevel\":\"NEW\",\"campus\":\"DONGFENG\",\"categoryId\":1,\"images\":[\"{{tinyImage}}\"]}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"itemC\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "发布商品 itemD",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Apifox-itemD-{{$timestamp}}\",\"description\":\"Apifox 全量回归\",\"price\":160,\"originalPrice\":320,\"conditionLevel\":\"NEW\",\"campus\":\"DONGFENG\",\"categoryId\":1,\"images\":[\"{{tinyImage}}\"]}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"itemD\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "发布商品 itemE",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Apifox-itemE-{{$timestamp}}\",\"description\":\"Apifox 全量回归\",\"price\":180,\"originalPrice\":360,\"conditionLevel\":\"NEW\",\"campus\":\"DONGFENG\",\"categoryId\":1,\"images\":[\"{{tinyImage}}\"]}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"itemE\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "集市关键词检索",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/items?keyword=Apifox&pageSize=50"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"返回列表\", () => pm.expect(body.data.list).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "集市已售视图",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/items?status=SOLD"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "详情隐私与砍价下限",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items/{{itemA}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"不暴露手机号\", () => pm.expect(body.data.seller.phone).to.be.undefined);",
+                  "pm.test(\"砍价下限 8 折\", () => pm.expect(Number(body.data.bargainFloor)).to.eql(80));",
+                  "pm.test(\"可立即购买\", () => pm.expect(body.data.canDirectBuy).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "我的发布",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items/mine?pageSize=50"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"包含新发布商品\", () => { const id = Number(pm.collectionVariables.get(\"itemA\")); pm.expect(body.data.list.some(i => i.id === id)).to.eql(true); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "下架商品",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items/{{itemD}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"OFF_SHELF\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "重新上架",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items/{{itemD}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"ON_SALE\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "越权改他人商品",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items/{{itemA}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"OFF_SHELF\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4003', () => { pm.expect(body.code).to.eql(4003); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "线下已售",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items/{{itemE}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"SOLD\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "线下已售无交易单",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/items/{{itemE}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"已售且无交易单\", () => { pm.expect(body.data.status).to.eql(\"SOLD\"); pm.expect(body.data.dealStatus).to.be.null; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "线下已售不可评价",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reviews",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemE}}\",\"rating\":5,\"content\":\"线下已售\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4003', () => { pm.expect(body.code).to.eql(4003); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "图片上传（手动，需文件）",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/files/upload",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "tests/apifox/tiny.png"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 留言",
+      "item": [
+        {
+          "name": "匿名问答列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/items/{{itemA}}/messages"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "买家留言",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items/{{itemA}}/messages",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"content\":\"Apifox留言{{$timestamp}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "保存留言话题 id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/items/{{itemA}}/messages"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"messageId\", body.data[0].id);",
+                  "pm.test(\"存在留言\", () => pm.expect(body.data.length).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "卖家回复",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items/{{itemA}}/messages",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"content\":\"卖家回复\",\"parentId\":\"{{messageId}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "我的留言-买家",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/messages/mine?view=sent"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "我的留言-卖家",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/messages/mine?view=received"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "标记单条已读",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/messages/{{messageId}}/read"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "标记商品留言已读",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/messages/item/{{itemA}}/read"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "空白留言被拒",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items/{{itemA}}/messages",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"content\":\"   \"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4001', () => { pm.expect(body.code).to.eql(4001); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "匿名留言 401",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/items/{{itemA}}/messages",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"content\":\"匿名\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 砍价",
+      "item": [
+        {
+          "name": "低于 8 折被拒",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/bargains",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemA}}\",\"offerPrice\":79}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4001', () => { pm.expect(body.code).to.eql(4001); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8 折出价",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/bargains",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemA}}\",\"offerPrice\":80}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"bargainA\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "重复出价被拒",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/bargains",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemA}}\",\"offerPrice\":80}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4005', () => { pm.expect(body.code).to.eql(4005); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "高于挂牌价被拒",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/bargains",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemD}}\",\"offerPrice\":160}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4001', () => { pm.expect(body.code).to.eql(4001); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "砍价列表-买家",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/bargains?view=sent"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "买家接受自己的出价被拒",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/bargains/{{bargainA}}/accept",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4003', () => { pm.expect(body.code).to.eql(4003); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "卖家接受出价",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/bargains/{{bargainA}}/accept",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "待成交锁定",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items/{{itemA}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"待成交\", () => { pm.expect(body.data.reserved).to.eql(true); pm.expect(body.data.dealStatus).to.eql(\"PENDING\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "锁定期再出价被拒",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/bargains",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemA}}\",\"offerPrice\":80}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4005', () => { pm.expect(body.code).to.eql(4005); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "查询砍价交易单",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals?view=received"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "const itemId = Number(pm.collectionVariables.get(\"itemA\")); const deal = body.data.list.find(d => d.itemId === itemId); pm.test(\"找到交易单\", () => pm.expect(deal).to.not.be.undefined); if (deal) pm.collectionVariables.set(\"dealA\", deal.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "拒绝出价",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/bargains",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemD}}\",\"offerPrice\":130}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"bargainReject\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "卖家拒绝出价",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/bargains/{{bargainReject}}/reject",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "取消出价",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/bargains",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemD}}\",\"offerPrice\":130}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"bargainCancel\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "买家取消出价",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/bargains/{{bargainCancel}}/cancel",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 交易单",
+      "item": [
+        {
+          "name": "立即购买",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals/direct",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemB}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"dealB\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "重复立即购买被拒",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals/direct",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemB}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4005', () => { pm.expect(body.code).to.eql(4005); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "卖家确认成交",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals/{{dealB}}/complete",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "成交后详情",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items/{{itemB}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"已售且可评价\", () => { pm.expect(body.data.status).to.eql(\"SOLD\"); pm.expect(body.data.dealStatus).to.eql(\"COMPLETED\"); pm.expect(body.data.canReview).to.eql(true); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "买家评价",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reviews",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemB}}\",\"rating\":5,\"content\":\"Apifox评价\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "重复评价被拒",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reviews",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemB}}\",\"rating\":4,\"content\":\"重复评价\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4005', () => { pm.expect(body.code).to.eql(4005); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "立即购买待取消",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals/direct",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemD}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"dealD\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "取消交易单",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals/{{dealD}}/cancel",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "取消后解锁",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items/{{itemD}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"回到在售\", () => { pm.expect(body.data.status).to.eql(\"ON_SALE\"); pm.expect(body.data.reserved).to.eql(false); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "已取消交易单私聊只读",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals/{{dealD}}/messages",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"content\":\"已取消\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4005', () => { pm.expect(body.code).to.eql(4005); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "确认砍价交易单",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals/{{dealA}}/complete",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "卖家评价买家",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reviews",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemA}}\",\"rating\":5,\"content\":\"买家守时\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 预约",
+      "item": [
+        {
+          "name": "提交预约",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reservations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemC}}\",\"expectTime\":\"2026-12-01T15:00:00\",\"remark\":\"图书馆门口\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"reservation1\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "预约列表-买家",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reservations?view=sent"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "重复预约被拒",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reservations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemC}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4005', () => { pm.expect(body.code).to.eql(4005); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "确认预约",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reservations/{{reservation1}}/confirm",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "预约锁定详情",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items/{{itemC}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"预约锁定\", () => { pm.expect(body.data.reserved).to.eql(true); pm.expect(body.data.dealSource).to.eql(\"RESERVATION\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "查询预约交易单",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals?view=received"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "const itemId = Number(pm.collectionVariables.get(\"itemC\")); const deal = body.data.list.find(d => d.itemId === itemId); pm.test(\"找到预约交易单\", () => pm.expect(deal).to.not.be.undefined); if (deal) pm.collectionVariables.set(\"dealC\", deal.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "取消预约交易单",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals/{{dealC}}/cancel",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "取消预约后解锁",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/items/{{itemC}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"回到在售\", () => pm.expect(body.data.status).to.eql(\"ON_SALE\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "再次预约用于拒绝",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reservations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemC}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"reservation2\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "卖家拒绝预约",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reservations/{{reservation2}}/reject",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "再次预约用于取消",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reservations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemC}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"reservation3\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "买家取消预约",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reservations/{{reservation3}}/cancel",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 私聊、评价与举报",
+      "item": [
+        {
+          "name": "买家发私聊",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals/{{dealA}}/messages",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"content\":\"Apifox私聊\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "卖家读私聊",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals/{{dealA}}/messages"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"有消息\", () => pm.expect(body.data.list.length).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "管理员读私聊被拒",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals/{{dealA}}/messages"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4003', () => { pm.expect(body.code).to.eql(4003); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "非交易方确认成交被拒",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/deals/{{dealA}}/complete",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4003', () => { pm.expect(body.code).to.eql(4003); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "用户评价列表",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/users/2/reviews"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "我的评价",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reviews/mine"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "提交举报",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reports",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemD}}\",\"reason\":\"FAKE\",\"detail\":\"Apifox举报\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.collectionVariables.set(\"reportId\", body.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "重复举报被拒",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reports",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":\"{{itemD}}\",\"reason\":\"FAKE\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4005', () => { pm.expect(body.code).to.eql(4005); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "我的举报",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{buyerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/reports/mine"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07 管理端与权限",
+      "item": [
+        {
+          "name": "管理员用户列表",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/users"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "禁用新用户",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/users/{{newUserId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"DISABLED\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "禁用用户登录失败",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"studentNo\":\"{{newStudentNo}}\",\"password\":\"{{password}}\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4007', () => { pm.expect(body.code).to.eql(4007); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "启用新用户",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/users/{{newUserId}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"ACTIVE\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "管理员商品列表",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/items"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "强制下架商品",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/items/{{itemD}}/off-shelf",
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "下架后商品不可见",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/items/{{itemD}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });",
+                  "pm.test(\"已下架\", () => pm.expect(body.data.status).to.eql(\"OFF_SHELF\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "管理员举报列表",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/reports"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "举报处置-下架",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/reports/{{reportId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"action\":\"OFF_SHELF\"}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "管理员调用用户写接口被拒",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/bargains",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"itemId\":1,\"offerPrice\":22}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4003', () => { pm.expect(body.code).to.eql(4003); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "管理员只读浏览集市",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/items?pageSize=3"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 0', () => { pm.expect(body.code).to.eql(0); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "普通用户访问管理接口被拒",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{sellerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/admin/users"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('业务码 4003', () => { pm.expect(body.code).to.eql(4003); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "未登录访问受保护接口",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/items/mine"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

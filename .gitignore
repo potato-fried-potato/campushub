@@ -21,6 +21,9 @@ backend/target/
 frontend/node_modules/
 node_modules/
 frontend/dist/
+# Playwright 报告与失败截图
+frontend/playwright-report/
+frontend/test-results/
 # 前端构建产物（由 npm run build 生成，后端直接托管，不入库）
 /backend/src/main/resources/static/*
 !/backend/src/main/resources/static/.gitkeep
