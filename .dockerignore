@@ -1,0 +1,28 @@
+# 版本控制与本地配置
+.git
+.gitignore
+.idea
+.vscode
+*.log
+.env
+.env.*
+!.env.example
+
+# 敏感文件（禁止进入构建上下文）
+成员邮箱与令牌_提交与推送一定要忽略.txt
+AGENTS.md
+
+# 构建产物与依赖
+backend/target
+backend/src/main/resources/static
+frontend/node_modules
+frontend/dist
+frontend/playwright-report
+frontend/test-results
+
+# 测试与文档不参与镜像构建
+frontend/e2e
+frontend/playwright.config.js
+tests
+docs
+README.md

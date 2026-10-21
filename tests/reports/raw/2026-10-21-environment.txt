@@ -1,0 +1,14 @@
+时间：2026-10-21 13:46:26 +08:00
+主机：MISS / Microsoft Windows NT 10.0.26300.0
+分支：develop  提交：3545509
+工作区未提交改动数：20
+应用地址：http://localhost:8080
+JAVA_HOME：C:\Program Files\Java\jdk-21.0.11
+Maven 实际使用的 java：java version "21.0.11" 2026-04-21 LTS
+node：v24.14.1
+docker server：29.9.1
+镜像：campushub-backend:local 55f17496501e
+镜像：campushub-frontend:local 6ac9f5a21623
+数据库容器镜像：mysql:8.0
+预检：接口存活（HTTP 200）
+数据库种子（回归前）：user=14 item=32 image=45 bargain=5 deal=1

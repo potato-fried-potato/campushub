@@ -1,0 +1,443 @@
+npm warn deprecated har-validator@5.1.5: this library is no longer supported
+npm warn deprecated uuid@3.4.0: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+npm warn deprecated uuid@8.3.2: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+npm warn deprecated @faker-js/faker@5.5.3: Please update to a newer version.
+(node:14764) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+newman
+
+CampusHub API 全量回归（Apifox 导入）
+
+□ 00 认证
+└ 注册新用户
+  POST http://localhost:8080/api/auth/register [200 OK, 930B, 112ms]
+  √  业务码 0
+  √  返回 JWT
+
+└ 重复注册被拒
+  POST http://localhost:8080/api/auth/register [200 OK, 220B, 8ms]
+  √  业务码 4005
+
+└ 登录-卖家
+  POST http://localhost:8080/api/auth/login [200 OK, 908B, 74ms]
+  √  业务码 0
+
+└ 登录-买家
+  POST http://localhost:8080/api/auth/login [200 OK, 901B, 73ms]
+  √  业务码 0
+
+└ 登录-管理员
+  POST http://localhost:8080/api/auth/login [200 OK, 896B, 69ms]
+  √  业务码 0
+  √  角色为 ADMIN
+
+└ 错误密码登录
+  POST http://localhost:8080/api/auth/login [200 OK, 223B, 64ms]
+  √  业务码 4002
+
+└ 当前用户信息
+  GET http://localhost:8080/api/auth/me [200 OK, 680B, 10ms]
+  √  业务码 0
+  √  返回学号
+
+└ 登出
+  POST http://localhost:8080/api/auth/logout [200 OK, 206B, 4ms]
+  √  业务码 0
+
+└ 分类列表
+  GET http://localhost:8080/api/categories [200 OK, 639B, 6ms]
+  √  业务码 0
+  √  6 个分类
+
+└ 平台统计
+  GET http://localhost:8080/api/system/stats [200 OK, 279B, 7ms]
+  √  业务码 0
+  √  四项指标
+
+□ 01 商品
+└ 发布商品 itemA
+  POST http://localhost:8080/api/items [200 OK, 211B, 24ms]
+  √  业务码 0
+
+└ 发布商品 itemB
+  POST http://localhost:8080/api/items [200 OK, 211B, 26ms]
+  √  业务码 0
+
+└ 发布商品 itemC
+  POST http://localhost:8080/api/items [200 OK, 211B, 28ms]
+  √  业务码 0
+
+└ 发布商品 itemD
+  POST http://localhost:8080/api/items [200 OK, 211B, 33ms]
+  √  业务码 0
+
+└ 发布商品 itemE
+  POST http://localhost:8080/api/items [200 OK, 211B, 23ms]
+  √  业务码 0
+
+└ 集市关键词检索
+  GET http://localhost:8080/api/items?keyword=Apifox&pageSize=50 [200 OK, 3.12kB, 18ms]
+  √  业务码 0
+  √  返回列表
+
+└ 集市已售视图
+  GET http://localhost:8080/api/items?status=SOLD [200 OK, 322.6kB, 13ms]
+  √  业务码 0
+
+└ 详情隐私与砍价下限
+  GET http://localhost:8080/api/items/33 [200 OK, 912B, 28ms]
+  √  业务码 0
+  √  不暴露手机号
+  √  砍价下限 8 折
+  √  可立即购买
+
+└ 我的发布
+  GET http://localhost:8080/api/items/mine?pageSize=50 [200 OK, 305.57kB, 11ms]
+  √  业务码 0
+  √  包含新发布商品
+
+└ 下架商品
+  PATCH http://localhost:8080/api/items/36/status [200 OK, 206B, 22ms]
+  √  业务码 0
+
+└ 重新上架
+  PATCH http://localhost:8080/api/items/36/status [200 OK, 206B, 18ms]
+  √  业务码 0
+
+└ 越权改他人商品
+  PATCH http://localhost:8080/api/items/33/status [200 OK, 229B, 7ms]
+  √  业务码 4003
+
+└ 线下已售
+  PATCH http://localhost:8080/api/items/37/status [200 OK, 206B, 21ms]
+  √  业务码 0
+
+└ 线下已售无交易单
+  GET http://localhost:8080/api/items/37 [200 OK, 912B, 27ms]
+  √  业务码 0
+  √  已售且无交易单
+
+└ 线下已售不可评价
+  POST http://localhost:8080/api/reviews [200 OK, 253B, 13ms]
+  √  业务码 4003
+
+└ 图片上传（手动，需文件）
+(node:14764) [DEP0044] DeprecationWarning: The `util.isArray` API is deprecated. Please use `Array.isArray()` instead.
+  POST http://localhost:8080/api/files/upload [200 OK, 326B, 56ms]
+  √  业务码 0
+
+□ 02 留言
+└ 匿名问答列表
+  GET http://localhost:8080/api/items/33/messages [200 OK, 204B, 6ms]
+  √  业务码 0
+
+└ 买家留言
+  POST http://localhost:8080/api/items/33/messages [200 OK, 206B, 21ms]
+  √  业务码 0
+
+└ 保存留言话题 id
+  GET http://localhost:8080/api/items/33/messages [200 OK, 332B, 8ms]
+  √  业务码 0
+  √  存在留言
+
+└ 卖家回复
+  POST http://localhost:8080/api/items/33/messages [200 OK, 206B, 19ms]
+  √  业务码 0
+
+└ 我的留言-买家
+  GET http://localhost:8080/api/messages/mine?view=sent [200 OK, 395B, 9ms]
+  √  业务码 0
+
+└ 我的留言-卖家
+  GET http://localhost:8080/api/messages/mine?view=received [200 OK, 392B, 10ms]
+  √  业务码 0
+
+└ 标记单条已读
+  PATCH http://localhost:8080/api/messages/1/read [200 OK, 206B, 19ms]
+  √  业务码 0
+
+└ 标记商品留言已读
+  PATCH http://localhost:8080/api/messages/item/33/read [200 OK, 206B, 7ms]
+  √  业务码 0
+
+└ 空白留言被拒
+  POST http://localhost:8080/api/items/33/messages [200 OK, 230B, 5ms]
+  √  业务码 4001
+
+└ 匿名留言 401
+  POST http://localhost:8080/api/items/33/messages [401 Unauthorized, 244B, 4ms]
+  √  HTTP 401
+
+□ 03 砍价
+└ 低于 8 折被拒
+  POST http://localhost:8080/api/bargains [200 OK, 256B, 8ms]
+  √  业务码 4001
+
+└ 8 折出价
+  POST http://localhost:8080/api/bargains [200 OK, 229B, 16ms]
+  √  业务码 0
+
+└ 重复出价被拒
+  POST http://localhost:8080/api/bargains [200 OK, 232B, 7ms]
+  √  业务码 4005
+
+└ 高于挂牌价被拒
+  POST http://localhost:8080/api/bargains [200 OK, 229B, 8ms]
+  √  业务码 4001
+
+└ 砍价列表-买家
+  GET http://localhost:8080/api/bargains?view=sent [200 OK, 461B, 10ms]
+  √  业务码 0
+
+└ 买家接受自己的出价被拒
+  POST http://localhost:8080/api/bargains/6/accept [200 OK, 229B, 15ms]
+  √  业务码 4003
+
+└ 卖家接受出价
+  POST http://localhost:8080/api/bargains/6/accept [200 OK, 206B, 24ms]
+  √  业务码 0
+
+└ 待成交锁定
+  GET http://localhost:8080/api/items/33 [200 OK, 918B, 22ms]
+  √  业务码 0
+  √  待成交
+
+└ 锁定期再出价被拒
+  POST http://localhost:8080/api/bargains [200 OK, 250B, 6ms]
+  √  业务码 4005
+
+└ 查询砍价交易单
+  GET http://localhost:8080/api/deals?view=received [200 OK, 692B, 16ms]
+  √  业务码 0
+  √  找到交易单
+
+└ 拒绝出价
+  POST http://localhost:8080/api/bargains [200 OK, 229B, 16ms]
+  √  业务码 0
+
+└ 卖家拒绝出价
+  POST http://localhost:8080/api/bargains/7/reject [200 OK, 206B, 15ms]
+  √  业务码 0
+
+└ 取消出价
+  POST http://localhost:8080/api/bargains [200 OK, 229B, 22ms]
+  √  业务码 0
+
+└ 买家取消出价
+  POST http://localhost:8080/api/bargains/8/cancel [200 OK, 206B, 25ms]
+  √  业务码 0
+
+□ 04 交易单
+└ 立即购买
+  POST http://localhost:8080/api/deals/direct [200 OK, 266B, 29ms]
+  √  业务码 0
+
+└ 重复立即购买被拒
+  POST http://localhost:8080/api/deals/direct [200 OK, 232B, 8ms]
+  √  业务码 4005
+
+└ 卖家确认成交
+  POST http://localhost:8080/api/deals/3/complete [200 OK, 206B, 21ms]
+  √  业务码 0
+
+└ 成交后详情
+  GET http://localhost:8080/api/items/34 [200 OK, 919B, 18ms]
+  √  业务码 0
+  √  已售且可评价
+
+└ 买家评价
+  POST http://localhost:8080/api/reviews [200 OK, 210B, 24ms]
+  √  业务码 0
+
+└ 重复评价被拒
+  POST http://localhost:8080/api/reviews [200 OK, 223B, 14ms]
+  √  业务码 4005
+
+└ 立即购买待取消
+  POST http://localhost:8080/api/deals/direct [200 OK, 266B, 22ms]
+  √  业务码 0
+
+└ 取消交易单
+  POST http://localhost:8080/api/deals/4/cancel [200 OK, 206B, 18ms]
+  √  业务码 0
+
+└ 取消后解锁
+  GET http://localhost:8080/api/items/36 [200 OK, 913B, 21ms]
+  √  业务码 0
+  √  回到在售
+
+└ 已取消交易单私聊只读
+  POST http://localhost:8080/api/deals/4/messages [200 OK, 232B, 8ms]
+  √  业务码 4005
+
+└ 确认砍价交易单
+  POST http://localhost:8080/api/deals/2/complete [200 OK, 206B, 29ms]
+  √  业务码 0
+
+└ 卖家评价买家
+  POST http://localhost:8080/api/reviews [200 OK, 210B, 21ms]
+  √  业务码 0
+
+□ 05 预约
+└ 提交预约
+  POST http://localhost:8080/api/reservations [200 OK, 229B, 30ms]
+  √  业务码 0
+
+└ 预约列表-买家
+  GET http://localhost:8080/api/reservations?view=sent [200 OK, 470B, 11ms]
+  √  业务码 0
+
+└ 重复预约被拒
+  POST http://localhost:8080/api/reservations [200 OK, 235B, 8ms]
+  √  业务码 4005
+
+└ 确认预约
+  POST http://localhost:8080/api/reservations/1/confirm [200 OK, 206B, 19ms]
+  √  业务码 0
+
+└ 预约锁定详情
+  GET http://localhost:8080/api/items/35 [200 OK, 923B, 18ms]
+  √  业务码 0
+  √  预约锁定
+
+└ 查询预约交易单
+  GET http://localhost:8080/api/deals?view=received [200 OK, 2.08kB, 7ms]
+  √  业务码 0
+  √  找到预约交易单
+
+└ 取消预约交易单
+  POST http://localhost:8080/api/deals/5/cancel [200 OK, 206B, 17ms]
+  √  业务码 0
+
+└ 取消预约后解锁
+  GET http://localhost:8080/api/items/35 [200 OK, 915B, 16ms]
+  √  业务码 0
+  √  回到在售
+
+└ 再次预约用于拒绝
+  POST http://localhost:8080/api/reservations [200 OK, 229B, 14ms]
+  √  业务码 0
+
+└ 卖家拒绝预约
+  POST http://localhost:8080/api/reservations/2/reject [200 OK, 206B, 13ms]
+  √  业务码 0
+
+└ 再次预约用于取消
+  POST http://localhost:8080/api/reservations [200 OK, 229B, 16ms]
+  √  业务码 0
+
+└ 买家取消预约
+  POST http://localhost:8080/api/reservations/3/cancel [200 OK, 206B, 16ms]
+  √  业务码 0
+
+□ 06 私聊、评价与举报
+└ 买家发私聊
+  POST http://localhost:8080/api/deals/2/messages [200 OK, 206B, 15ms]
+  √  业务码 0
+
+└ 卖家读私聊
+  GET http://localhost:8080/api/deals/2/messages [200 OK, 443B, 14ms]
+  √  业务码 0
+  √  有消息
+
+└ 管理员读私聊被拒
+  GET http://localhost:8080/api/deals/2/messages [200 OK, 241B, 5ms]
+  √  业务码 4003
+
+└ 非交易方确认成交被拒
+  POST http://localhost:8080/api/deals/2/complete [200 OK, 275B, 4ms]
+  √  业务码 4003
+
+└ 用户评价列表
+  GET http://localhost:8080/api/users/2/reviews [200 OK, 720B, 6ms]
+  √  业务码 0
+
+└ 我的评价
+  GET http://localhost:8080/api/reviews/mine [200 OK, 800B, 7ms]
+  √  业务码 0
+
+└ 提交举报
+  POST http://localhost:8080/api/reports [200 OK, 229B, 21ms]
+  √  业务码 0
+
+└ 重复举报被拒
+  POST http://localhost:8080/api/reports [200 OK, 226B, 8ms]
+  √  业务码 4005
+
+└ 我的举报
+  GET http://localhost:8080/api/reports/mine [200 OK, 428B, 8ms]
+  √  业务码 0
+
+□ 07 管理端与权限
+└ 管理员用户列表
+  GET http://localhost:8080/api/admin/users [200 OK, 5.03kB, 13ms]
+  √  业务码 0
+
+└ 禁用新用户
+  PATCH http://localhost:8080/api/admin/users/15/status [200 OK, 206B, 16ms]
+  √  业务码 0
+
+└ 禁用用户登录失败
+  POST http://localhost:8080/api/auth/login [200 OK, 220B, 55ms]
+  √  业务码 4007
+
+└ 启用新用户
+  PATCH http://localhost:8080/api/admin/users/15/status [200 OK, 206B, 22ms]
+  √  业务码 0
+
+└ 管理员商品列表
+  GET http://localhost:8080/api/admin/items [200 OK, 569.79kB, 16ms]
+  √  业务码 0
+
+└ 强制下架商品
+  PATCH http://localhost:8080/api/admin/items/36/off-shelf [200 OK, 206B, 20ms]
+  √  业务码 0
+
+└ 下架后商品不可见
+  GET http://localhost:8080/api/items/36 [200 OK, 917B, 15ms]
+  √  业务码 0
+  √  已下架
+
+└ 管理员举报列表
+  GET http://localhost:8080/api/admin/reports [200 OK, 477B, 5ms]
+  √  业务码 0
+
+└ 举报处置-下架
+  PATCH http://localhost:8080/api/admin/reports/1 [200 OK, 206B, 35ms]
+  √  业务码 0
+
+└ 管理员调用用户写接口被拒
+  POST http://localhost:8080/api/bargains [200 OK, 275B, 3ms]
+  √  业务码 4003
+
+└ 管理员只读浏览集市
+  GET http://localhost:8080/api/items?pageSize=3 [200 OK, 187.72kB, 7ms]
+  √  业务码 0
+
+└ 普通用户访问管理接口被拒
+  GET http://localhost:8080/api/admin/users [200 OK, 223B, 5ms]
+  √  业务码 4003
+
+└ 未登录访问受保护接口
+  GET http://localhost:8080/api/items/mine [401 Unauthorized, 244B, 5ms]
+  √  HTTP 401
+
+┌─────────────────────────┬───────────────────┬──────────────────┐
+│                         │          executed │           failed │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│              iterations │                 1 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│                requests │                96 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│            test-scripts │                96 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│      prerequest-scripts │                 1 │                0 │
+├─────────────────────────┼───────────────────┼──────────────────┤
+│              assertions │               117 │                0 │
+├─────────────────────────┴───────────────────┴──────────────────┤
+│ total run duration: 7.6s                                       │
+├────────────────────────────────────────────────────────────────┤
+│ total data received: 1.41MB (approx)                           │
+├────────────────────────────────────────────────────────────────┤
+│ average response time: 19ms [min: 3ms, max: 112ms, s.d.: 17ms] │
+└────────────────────────────────────────────────────────────────┘

@@ -1,0 +1,195 @@
+name: CD
+
+# 持续部署：推送 v* 标签（或手动触发）时构建前端 / 后端两个镜像 → 推送 GHCR → 用发布镜像真实部署并回归
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  build-backend:
+    name: 构建并推送后端镜像
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 准备 Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 登录 GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 生成镜像标签
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}-backend
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=branch
+            type=sha,format=short
+            type=raw,value=latest,enable=${{ github.ref_type == 'tag' }}
+
+      - name: 构建并推送后端镜像
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+  build-frontend:
+    name: 构建并推送前端镜像
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 准备 Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 登录 GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 生成镜像标签
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository }}-frontend
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=branch
+            type=sha,format=short
+            type=raw,value=latest,enable=${{ github.ref_type == 'tag' }}
+
+      - name: 构建并推送前端镜像
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+  deploy-verify:
+    name: 拉取发布镜像并验证部署
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 登录 GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 按 digest 精确拉取两个发布镜像
+        run: |
+          docker pull ${{ env.REGISTRY }}/${{ github.repository }}-backend@${{ needs.build-backend.outputs.digest }}
+          docker tag  ${{ env.REGISTRY }}/${{ github.repository }}-backend@${{ needs.build-backend.outputs.digest }} campushub-backend:verify
+          docker pull ${{ env.REGISTRY }}/${{ github.repository }}-frontend@${{ needs.build-frontend.outputs.digest }}
+          docker tag  ${{ env.REGISTRY }}/${{ github.repository }}-frontend@${{ needs.build-frontend.outputs.digest }} campushub-frontend:verify
+
+      - name: 启动数据库并导入种子数据
+        run: |
+          docker network create campushub-net
+          docker run -d --name campushub-mysql --network campushub-net \
+            -e MYSQL_ROOT_PASSWORD=123456 \
+            -e MYSQL_DATABASE=campushub \
+            -e LANG=C.UTF-8 \
+            -v "$PWD/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro" \
+            mysql:8.0 \
+            --character-set-server=utf8mb4 --collation-server=utf8mb4_0900_ai_ci
+          for i in $(seq 1 40); do
+            count=$(docker exec campushub-mysql mysql -uroot -p123456 -N -B \
+              -e "SELECT COUNT(*) FROM campushub.item" 2>/dev/null || true)
+            if [ -n "$count" ] && [ "$count" -gt 0 ] 2>/dev/null; then
+              echo "数据库已就绪，种子商品数：$count"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "数据库未就绪（种子数据未导入完成）"
+          docker logs campushub-mysql
+          exit 1
+
+      - name: 用发布镜像启动后端
+        run: |
+          docker run -d --name campushub-backend --network campushub-net -p 8081:8080 \
+            -e SPRING_DATASOURCE_URL="jdbc:mysql://campushub-mysql:3306/campushub?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true" \
+            -e SPRING_DATASOURCE_USERNAME=root \
+            -e SPRING_DATASOURCE_PASSWORD=123456 \
+            -e TZ=Asia/Shanghai \
+            campushub-backend:verify
+          for i in $(seq 1 40); do
+            if curl -fsS http://localhost:8081/api/categories >/dev/null 2>&1; then
+              echo "后端已就绪"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "后端未就绪"
+          docker logs campushub-backend
+          exit 1
+
+      - name: 用发布镜像启动前端（Nginx）
+        run: |
+          docker run -d --name campushub-frontend --network campushub-net -p 8080:80 \
+            campushub-frontend:verify
+
+      - name: 冒烟验证（前端页面 + 经 Nginx 的接口）
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/api/categories >/dev/null 2>&1; then
+              echo "前端入口已就绪"
+              break
+            fi
+            sleep 3
+          done
+          curl -fsS http://localhost:8080/ | grep -q '智校互联'
+          echo "前端页面渲染正常"
+          curl -fsS http://localhost:8080/api/categories | grep -q '"code":0'
+          echo "Nginx → 后端 反向代理正常"
+
+      - name: 对发布镜像执行接口回归
+        run: pwsh -NoProfile -File tests/api-e2e.ps1
+
+      - name: 失败时输出三个容器日志
+        if: failure()
+        run: |
+          docker logs campushub-frontend || true
+          docker logs campushub-backend || true
+          docker logs campushub-mysql || true

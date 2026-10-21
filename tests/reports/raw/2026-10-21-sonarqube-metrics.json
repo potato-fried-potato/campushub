@@ -1,0 +1,83 @@
+{
+  "component": {
+    "key": "campushub-backend",
+    "name": "CampusHub 后端",
+    "description": "智校互联 (CampusHub) 校园二手交易协同平台 - 后端",
+    "qualifier": "TRK",
+    "measures": [
+      {
+        "metric": "coverage",
+        "value": "27.7",
+        "bestValue": false
+      },
+      {
+        "metric": "complexity",
+        "value": "731"
+      },
+      {
+        "metric": "reliability_rating",
+        "value": "1.0",
+        "bestValue": true
+      },
+      {
+        "metric": "duplicated_lines_density",
+        "value": "3.5",
+        "bestValue": false
+      },
+      {
+        "metric": "code_smells",
+        "value": "42",
+        "bestValue": false
+      },
+      {
+        "metric": "security_rating",
+        "value": "5.0",
+        "bestValue": false
+      },
+      {
+        "metric": "security_hotspots",
+        "value": "0",
+        "bestValue": true
+      },
+      {
+        "metric": "sqale_index",
+        "value": "210",
+        "bestValue": false
+      },
+      {
+        "metric": "sqale_rating",
+        "value": "1.0",
+        "bestValue": true
+      },
+      {
+        "metric": "bugs",
+        "value": "0",
+        "bestValue": true
+      },
+      {
+        "metric": "branch_coverage",
+        "value": "22.2",
+        "bestValue": false
+      },
+      {
+        "metric": "cognitive_complexity",
+        "value": "353",
+        "bestValue": false
+      },
+      {
+        "metric": "ncloc",
+        "value": "2926"
+      },
+      {
+        "metric": "vulnerabilities",
+        "value": "1",
+        "bestValue": false
+      },
+      {
+        "metric": "line_coverage",
+        "value": "30.7",
+        "bestValue": false
+      }
+    ]
+  }
+}

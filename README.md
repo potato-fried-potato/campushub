@@ -1,8 +1,8 @@
 # 智校互联 (CampusHub) 校园二手交易协同平台
 
 > **《软件工程项目实现》课程设计 · 软件工程 2402 · 第 11 组**  
-> **技术栈**：Spring Boot 3 + Vue 3 (Vite 工程化) + MySQL 8.0（零外部中间件开箱即用体系，技术决策见 `docs/01`）  
-> **当前状态**：三天计划全部完成——Day 1 ~ Day 3 的 8 个成员提交均已合并 `develop`，12 个用户故事全部落地；自动化测试：后端 JUnit 40 项、Apifox 全量集合 96 请求 / 117 断言（Apifox 场景 93 步全绿）、Playwright UI 4 条关键流程，接口脚本 `tests/api-e2e.ps1` 62 项断言。收尾优化与交易闭环重构已完成（进度见 `docs/05` 第四节）。
+> **技术栈**：Spring Boot 3 + Vue 3 (Vite 工程化) + MySQL 8.0 + Docker Compose（零外部中间件开箱即用体系，技术决策见 `docs/01`）  
+> **当前状态**：三天计划全部完成——Day 1 ~ Day 3 的 8 个成员提交均已合并 `develop`，12 个用户故事全部落地；自动化测试：后端 JUnit 40 项、Apifox 全量集合 96 请求 / 117 断言（Apifox 场景 96 步全绿、未测 0）、Playwright UI 10 条流程，接口脚本 `tests/api-e2e.ps1` 62 项断言；已完成容器化部署与 GitHub Actions CI/CD 流水线（详见 `docs/07`）。收尾优化与交易闭环重构已完成（进度见 `docs/05` 第四节）。
 
 ---
 
@@ -40,7 +40,7 @@ Sprint 1~3 共 12 个用户故事 / 52 故事点，按业务域划分为：用�
 | US-04 闲置发布与图片直存 | 已实现 | 发布表单、图片上传与 Base64 直存 |
 | US-05 我的发布与状态流转 | 已实现 | 列表、状态流转；待成交期间禁止手动改状态，手动售出按「线下已售」处理 |
 | US-06 砍价议价闭环 | 已实现 | 出价 / 接受 / 拒绝 / 取消；接受出价生成交易单 |
-| US-07 一键启动脚本 | 已实现 | 一键启停、建库脚本与 E2E 回归 |
+| US-07 一键启动脚本 | 已实现 | 一键启停、建库脚本与 E2E 回归；另有 Docker Compose 容器化部署与 GitHub Actions CI/CD 流水线（见 `docs/07`） |
 | US-08 平台数据看板 | 已实现 | 统计接口与首页四项指标看板 |
 | US-09 站内留言互动 | 已实现 | 商品留言、回复与未读提醒 |
 | US-10 交易单与线下交易预约 | 已实现 | 立即购买 / 砍价成交 / 预约购买三路径统一交易单（预约按挂牌价、卖家确认后锁定），确认成交、取消解锁与「我的购买」 |
@@ -112,7 +112,54 @@ npm run dev
 
 ---
 
-## 五、已实现接口
+---
+
+## 五、Docker 一键运行
+
+项目按**前端 / 后端 / 数据库三容器**部署，由 `docker-compose.yml` 统一编排，首次启动自动导入 `db/init.sql` 演示数据：
+
+| 服务 | 镜像 | 容器名 | 宿主机端口 | 说明 |
+| :--- | :--- | :--- | :--- | :--- |
+| 前端 | `frontend/Dockerfile`（Node 构建 → Nginx） | `campushub-frontend` | `8080` | 托管静态页面，并把 `/api` 反代到后端容器 |
+| 后端 | `backend/Dockerfile`（Maven 构建 → JRE 21） | `campushub-backend` | `8081` | Spring Boot 接口服务，前端经服务名 `backend:8080` 访问 |
+| 数据库 | `mysql:8.0` | `campushub-mysql` | `3307` | 数据持久化，卷为空时导入种子数据 |
+
+> 完整的部署设计、环境变量说明与排障表见 [07. Docker 部署方案与 CI/CD 流水线](docs/07_Docker部署与CICD流水线.md)。
+
+### 1. 环境要求
+
+- Docker Desktop（Windows 使用 WSL 2 后端）
+- 首次安装后至少手动启动一次 Docker Desktop，待引擎状态变为 Running
+
+### 2. 启动
+
+```bash
+copy .env.example .env      # macOS / Linux 用 cp
+docker compose up -d --build
+```
+
+启动完成后访问 `http://localhost:8080`（管理端 `http://localhost:8080/#/admin/login`），演示账号同「四、本地运行」第 5 节。后端接口可用 `http://localhost:8081/api/...` 直连调试。
+
+> 三个容器按 `mysql (healthy) → backend (healthy) → frontend` 顺序启动。容器内 MySQL 在宿主机映射为 **3307**（`MYSQL_PORT`），避免与本机已有的 3306 冲突。`db/init.sql` 只在数据卷为空时执行一次。
+
+### 3. 常用命令
+
+| 目的 | 命令 |
+| :--- | :--- |
+| 查看状态 / 日志 | `docker compose ps` / `docker compose logs -f backend`（可换 `frontend` / `mysql`） |
+| 停止（保留数据） | `docker compose down` |
+| 清空数据并重新导入 | `docker compose down -v` 后再 `docker compose up -d` |
+| 仅重建前端 / 后端镜像 | `docker compose up -d --build frontend`（后端换成 `backend`） |
+
+### 4. 可配置环境变量
+
+见 `.env.example`：`MYSQL_ROOT_PASSWORD`、`MYSQL_PORT`、`APP_PORT`、`BACKEND_PORT`、`JAVA_OPTS`、`MAVEN_MIRROR_URL`、`BACKEND_IMAGE`、`FRONTEND_IMAGE`。
+
+> `MAVEN_MIRROR_URL` 只在镜像构建阶段生效，用于拉取后端 Maven 依赖，默认指向阿里云公共仓库，留空则走官方 Maven Central。
+
+---
+
+## 六、已实现接口
 
 | 模块 | 方法 | 路径 | 说明 |
 | :--- | :---: | :--- | :--- |
@@ -155,36 +202,48 @@ npm run dev
 
 ---
 
-## 六、一键脚本与测试
+## 七、一键脚本与测试
 
 - `一键启动.bat`：六步自检（JDK 21 → MySQL80 服务 → 数据库结构与自动导入 → 前端产物构建 → 后端打包 → 启动并打开浏览器）；
 - `一键停止.bat`：释放 8080 端口并关闭后端进程；
 - `db\init-db.bat`：一键重建演示数据（14 用户 / 6 分类 / 32 商品 / 45 图 / 5 条砍价 / 1 张交易单 / 3 条交易单私聊）；
 - `tests\api-e2e.ps1`：接口 E2E 回归（62 项断言），覆盖认证、鉴权、检索、详情（含手机号不外泄）、留言、砍价 8 折下限、预约、交易单三路径成交与取消、交易单私聊权限、评价举报、管理后台与「管理员不参与用户交易」的关键断言。
+- `tests\run-regression.ps1`：一键串起单元 / 集成 / 系统三层回归。PowerShell 7 用 `pwsh -File tests\run-regression.ps1`，Windows PowerShell 5.1 用 `powershell -NoProfile -ExecutionPolicy Bypass -File tests\run-regression.ps1`；原始输出自动留档到 `tests\reports\raw\`，退出码非 0 即表示有失败层次。
+- `tests\run-sonar.ps1`：代码质量分析（SonarQube 自托管）。先 `docker compose -f docker-compose.sonar.yml up -d` 起分析环境，再执行脚本，自动跑测试、采集 JaCoCo 覆盖率、上传分析并抓取质量指标留档。
 
 **三层自动化测试**
 
 | 层 | 命令 / 入口 | 覆盖 |
 | :--- | :--- | :--- |
 | 后端单元测试 | `cd backend && mvn test` | JUnit 5 + Mockito，40 项：砍价 8 折边界、交易单状态机、私聊权限、评价资格、商品隐私与状态流转、管理员隔离 |
-| API（Apifox） | 导入 [tests/apifox](tests/apifox/README.md) 下的全量集合与环境 | 96 个请求 / 117 条断言：认证、商品、留言、砍价、预约、交易单、私聊、评价举报、管理端与权限；Apifox 场景 93 步全绿（3 步为手动上传 / 预期 401，单独禁用） |
-| UI（Playwright） | `cd frontend && npm run test:ui` | 4 条关键流程：买家下单→确认成交→我的购买、管理员独立入口、管理员用户端登录拦截、砍价下限弹窗校验 |
+| API（Apifox） | 导入 [tests/apifox](tests/apifox/README.md) 下的全量集合与环境 | 96 个请求 / 117 条断言：认证、商品、留言、砍价、预约、交易单、私聊、评价举报、管理端与权限；Apifox 场景 96 步全绿、未测 0（其中 2 条 401 用例关闭场景默认响应码校验只留断言，1 条图片上传用例手动挂接文件） |
+| UI（Playwright） | `cd frontend && npm run test:ui` | 10 条流程：买家下单→确认成交→我的购买、管理员独立入口、管理员用户端登录拦截、砍价下限弹窗校验、集市搜索与筛选、发布闲置弹窗、商品问答、预约购买、我的购买联系卖家私聊、信用中心 |
 
-> Playwright 默认使用系统 Edge（`channel: 'msedge'`），无需额外下载浏览器；执行前需有可用后端，配置会自动复用已启动的 8080 服务。Apifox 集合同样可用 Newman 无头执行：`npx newman run tests/apifox/campushub-apifox.postman_collection.json -e tests/apifox/campushub-apifox.environment.json`。
+> Playwright 默认使用系统 Edge（`channel: 'msedge'`），无需额外下载浏览器；CI 中设 `PW_CHANNEL=bundled` 改用 Playwright 自带 Chromium。执行前需有可用后端，配置会自动复用已启动的 8080 服务。Apifox 集合同样可用 Newman 无头执行：`npx newman run tests/apifox/campushub-apifox.postman_collection.json -e tests/apifox/campushub-apifox.environment.json`。
+
+**测试与质量留档**：原始执行输出、环境快照与 10 张关键页面截图存放于 [tests/reports](tests/reports/README.md)，当次汇总见 [2026-10-21 全量回归记录](tests/reports/2026-10-21-全量回归记录.md)；代码质量（SonarQube）结果见 [2026-10-21 SonarQube 代码质量报告](tests/reports/2026-10-21-SonarQube代码质量报告.md)。
+
+**持续集成与持续部署**
+
+- `.github/workflows/ci.yml`：推送或发起 PR 时自动执行「后端单元测试 → 前端构建校验 → 容器内集成测试与系统测试」三级门禁，留存 Surefire 报告与 Playwright HTML 报告；
+- `.github/workflows/cd.yml`：推送 `v*` 标签时构建**前端与后端两个镜像**并推送 GHCR，随后按 digest 逐个拉取、真实部署三容器、冒烟（含 Nginx 反代链路）并执行接口回归。
+
+> 容器化设计、环境变量、运维命令与流水线细节见 [07. Docker 部署方案与 CI/CD 流水线](docs/07_Docker部署与CICD流水线.md)。
 
 脚本细节：JDK 检查优先读 `%JAVA_HOME%\bin\java.exe`（PATH 上的 java 可能是旧版本）；启动后轮询 8080 端口最多 90 秒，就绪才打开浏览器；端口被占用时提示先执行停止脚本；重建数据库前会提示后端正在运行。三个 `.bat` 均为 ASCII + CRLF，避免 cmd 解析乱码。
 
-## 七、团队
+## 八、团队
 
 本项目由软件工程 2402 第 11 组 6 人团队承接，分工采用**功能模块 × 前后端协作**模式：每个交付单元由前端、后端各 1 名主责人共同完成；成员名单与分工表见 [05. 团队组织与功能模块分工](docs/05_团队组织与功能模块分工.md)。
 
 ---
 
-## 八、文档索引
+## 九、文档索引
 
 1. **[01. 需求规格说明书与用户故事](docs/01_需求规格说明书与用户故事.md)**：包含愿景目标、用户画像、12 个用户故事（52 SP）的 Product Backlog、MoSCoW 优先级与 59 条验收标准 (AC)；
 2. **[02. 前后端 RESTful API 接口契约说明书](docs/02_RESTful_API接口契约.md)**：包含统一响应体、业务码表、JWT 鉴权、权限矩阵（含管理员隔离）与全模块接口契约（认证 / 商品 / 留言 / 砍价 / 预约 / 交易单与私聊 / 评价举报 / 管理后台）；
 3. **[03. 数据库设计与数据字典规范](docs/03_数据库设计与数据字典.md)**：包含 E-R 关系图、11 张表数据字典、索引策略、关键事务一致性与 MySQL 8.0 完整 DDL；
 4. **[04. 敏捷协作与 Git 工作流规范](docs/04_敏捷协作与Git工作流规范.md)**：包含迭代节奏、看板与会议机制、Git Flow 分支策略、Conventional Commits 与代码评审规则；
 5. **[05. 团队组织与功能模块分工](docs/05_团队组织与功能模块分工.md)**：用户 / 商品 / 交易与互动 / 平台门户 / 信用与治理 5 个功能模块 + 工程交付线的模块负责制分工表；
-6. **[06. 测试用例与执行规范](docs/06_测试用例与执行规范.md)**：包含按 M1~M6 功能模块组织的 63 条测试用例（接口 / UI / 脚本分层）、执行时机与留档规范。
+6. **[06. 测试用例与执行规范](docs/06_测试用例与执行规范.md)**：包含按 M1~M6 功能模块组织的 63 条测试用例（接口 / UI / 脚本分层）、执行时机、留档规范与截至 2026-10-21 的执行结果；
+7. **[07. Docker 部署方案与 CI/CD 流水线](docs/07_Docker部署与CICD流水线.md)**：包含前端 / 后端 / 数据库的容器化设计、环境变量与运维命令、CI 三层测试门禁与 CD 发布验证流程。

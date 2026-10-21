@@ -114,7 +114,7 @@ test(api): 新增留言断言组 (AC-9.x)
 
 #### 4.1 Pull Request 流程
 
-1. feature 分支开发完成：后端跑通 `mvn test`；接口改动执行 Apifox 集合（`tests/apifox`）或 `tests/api-e2e.ps1` 对应断言组；前端改动执行 `cd frontend && npm test`（Playwright）；
+1. feature 分支开发完成：后端跑通 `mvn test`；接口改动执行 Apifox 集合（`tests/apifox`）或 `tests/api-e2e.ps1` 对应断言组；前端改动执行 `cd frontend && npm test`（Playwright）；推送后 CI 会自动执行同样三项检查，最终以 CI 结果为准；
 2. 向 `develop` 发起 Pull Request，按模板填写：**关联 US / AC、变更内容、自测方式、UI 截图（涉及页面时）**；
 3. 至少 1 名成员 Review 通过（前端 ↔ 后端交叉评审：接口改动必须由对端负责人确认契约一致）；
 4. 使用 Squash Merge 合入 `develop`，删除源分支。
@@ -133,17 +133,19 @@ test(api): 新增留言断言组 (AC-9.x)
 
 #### 5.1 合并门禁（必须全部满足）
 
-1. `mvn test` 通过（40 项 JUnit 5 + Mockito：启动冒烟 + 核心业务规则）；
-2. 涉及接口的改动：Apifox 全量集合（96 请求 / 117 断言）或 `tests/api-e2e.ps1`（62 项断言）对应断言通过（用例清单见 `docs/06`）；
-3. 涉及页面的改动：`cd frontend && npm test`（Playwright 关键流程）通过；
-4. 受影响文档（`docs/01 ~ 06`）同步更新。
+1. GitHub Actions CI（`.github/workflows/ci.yml`）全绿：单元测试、前端构建、容器内集成测试与系统测试三层必须全部通过；
+2. `mvn test` 通过（40 项 JUnit 5 + Mockito：启动冒烟 + 核心业务规则）；
+3. 涉及接口的改动：Apifox 全量集合（96 请求 / 117 断言）或 `tests/api-e2e.ps1`（62 项断言）对应断言通过（用例清单见 `docs/06`）；
+4. 涉及页面的改动：`cd frontend && npm test`（Playwright，10 条流程）通过；
+5. 受影响文档（`docs/01 ~ 07`）同步更新。
 
 #### 5.2 迭代发布流程
 
 1. 迭代末从 `develop` 创建 `release/v<版本>`，冻结功能，只修缺陷；
 2. 伍宇轩在 release 分支执行全量 E2E 回归，边皓东对照 `docs/01` 完成 AC 验收；
 3. 验收通过后合入 `main` 并打标签（`v1.0.0` / `v1.1.0` / `v1.2.0`），随后反向合回 `develop`；
-4. 发布包由 `一键启动.bat` 全自动构建与启动（US-07 验收路径）。
+4. 打版本标签（如 `v1.0.0`）后由 `.github/workflows/cd.yml` 自动构建镜像、推送 GHCR，并用发布镜像完成部署冒烟与接口回归；
+5. 发布包同样可由 `一键启动.bat` 构建与启动，或由 `docker compose up -d --build` 容器化部署（US-07 验收路径，详见 `docs/07`）。
 
 ---
 

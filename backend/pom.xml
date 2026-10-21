@@ -19,6 +19,12 @@
 
     <properties>
         <java.version>21</java.version>
+        <jacoco.version>0.8.12</jacoco.version>
+        <sonar-maven-plugin.version>5.8.0.7211</sonar-maven-plugin.version>
+        <!-- SonarQube 服务地址与项目标识；可在命令行用 -Dsonar.host.url / -Dsonar.token 覆盖 -->
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.projectKey>campushub-backend</sonar.projectKey>
+        <sonar.projectName>CampusHub 后端</sonar.projectName>
     </properties>
 
     <dependencies>
@@ -57,6 +63,33 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- 覆盖率：测试阶段采集并生成 jacoco.xml，供 SonarQube 读取 -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- 代码质量扫描：mvn sonar:sonar -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>${sonar-maven-plugin.version}</version>
             </plugin>
         </plugins>
     </build>
