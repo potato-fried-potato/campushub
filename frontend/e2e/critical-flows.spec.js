@@ -51,7 +51,8 @@ test('买家下单 → 交易中心确认成交 → 我的购买可见', async (
 
   await page.getByRole('button', { name: /立即购买/ }).click()
   await page.locator('.el-message-box').getByRole('button', { name: '确定' }).click()
-  await expect(page.getByText('待成交交易单')).toBeVisible()
+  // 成功提示里也含「待成交交易单」字样，这里只匹配状态条本身的精确文案，避免 strict mode 命中两个元素
+  await expect(page.getByText('待成交交易单', { exact: true })).toBeVisible()
 
   await page.goto('/#/trade')
   await page.locator('.el-radio-button', { hasText: '我发出的' }).click()
