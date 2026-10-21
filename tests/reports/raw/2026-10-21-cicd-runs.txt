@@ -32,3 +32,20 @@ CampusHub GitHub Actions 运行记录（仓库 potato-fried-potato/campushub）
    修复：后端容器补充 --network-alias backend（与 compose 服务名语义一致）。
    本地同构验证：创建测试网络，用带别名的占位容器 + campushub-frontend:local 起 Nginx，
    日志无 [emerg]、容器 healthy、GET / 返回 200。
+
+三、修复后复跑（提交 9cb649f，标签 v1.1.1）
+
+1) CI run#3 | 分支 develop | 提交 9cb649f | 结果 completed/success
+2) CI run#4 | 分支 main | 提交 9cb649f | 结果 completed/success
+
+3) CD run#2 | 标签 v1.1.1 | 提交 9cb649f | 结果 completed/success | 总耗时 3 分 22 秒
+   https://github.com/potato-fried-potato/campushub/actions/runs/39560581728
+   构建并推送后端镜像               success   2 分 22 秒
+   构建并推送前端镜像               success   1 分 4 秒
+   拉取发布镜像并验证部署            success   0 分 53 秒
+
+   验证部署阶段实际完成：按 digest 拉取两个发布镜像 → 起 MySQL（导入种子 32 件商品）→
+   起后端 → 起前端 Nginx → 首页冒烟（校验「智校互联」）→ 经 Nginx 的 /api/categories 返回
+   code:0 → 对发布镜像执行 tests/api-e2e.ps1 的 62 项接口断言。
+
+   结论：CI 与 CD 两条流水线在真实 GitHub runner 上端到端跑通，发布镜像可用。

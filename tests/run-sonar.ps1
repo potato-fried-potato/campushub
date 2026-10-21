@@ -80,7 +80,7 @@ if (-not $token) { Write-Host "令牌生成失败" -ForegroundColor Red; exit 2 
 Write-Host "      令牌已生成（不写入任何文件）"
 
 # ---------- 4. 跑测试 + 采集覆盖率 + 上传分析 ----------
-Write-Host "[4/5] mvn verify sonar:sonar（含 40 项单测与 JaCoCo 覆盖率采集）..." -ForegroundColor Cyan
+Write-Host "[4/5] mvn verify sonar:sonar（含 92 项单测与 JaCoCo 覆盖率采集）..." -ForegroundColor Cyan
 $scanOut  = & mvn -B -f (Join-Path $repoRoot 'backend\pom.xml') verify sonar:sonar `
     "-Dsonar.token=$token" "-Dsonar.host.url=$SonarUrl" 2>&1
 $scanExit = $LASTEXITCODE

@@ -28,8 +28,8 @@
 [INFO]  T E S T S
 [INFO] -------------------------------------------------------
 [INFO] Running com.campushub.CampusHubApplicationTests
-14:15:32.048 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.campushub.CampusHubApplicationTests]: CampusHubApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-14:15:32.249 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.campushub.CampusHubApplication for test class com.campushub.CampusHubApplicationTests
+15:51:25.513 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.campushub.CampusHubApplicationTests]: CampusHubApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+15:51:25.730 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.campushub.CampusHubApplication for test class com.campushub.CampusHubApplicationTests
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -40,32 +40,42 @@
 
  :: Spring Boot ::               (v3.5.16)
 
-2026-10-21T14:15:33.194+08:00  INFO 33740 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : Starting CampusHubApplicationTests using Java 21.0.11 with PID 33740 (started by bhd32 in E:\ideproject\campushub\backend)
-2026-10-21T14:15:33.196+08:00 DEBUG 33740 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : Running with Spring Boot v3.5.16, Spring v6.2.19
-2026-10-21T14:15:33.197+08:00  INFO 33740 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : No active profile set, falling back to 1 default profile: "default"
-2026-10-21T14:15:39.455+08:00  INFO 33740 --- [campushub] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
-2026-10-21T14:15:41.032+08:00  INFO 33740 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : Started CampusHubApplicationTests in 8.451 seconds (process running for 10.073)
+2026-10-21T15:51:26.489+08:00  INFO 36420 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : Starting CampusHubApplicationTests using Java 21.0.11 with PID 36420 (started by bhd32 in E:\ideproject\campushub\backend)
+2026-10-21T15:51:26.489+08:00 DEBUG 36420 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : Running with Spring Boot v3.5.16, Spring v6.2.19
+2026-10-21T15:51:26.493+08:00  INFO 36420 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : No active profile set, falling back to 1 default profile: "default"
+2026-10-21T15:51:28.730+08:00  INFO 36420 --- [campushub] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-10-21T15:51:29.167+08:00  INFO 36420 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : Started CampusHubApplicationTests in 3.207 seconds (process running for 4.746)
 Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
 WARNING: A Java agent has been loaded dynamically (C:\Users\bhd32\webapp\apache-maven-3.9.9-bin\apache-maven-3.9.9\net\bytebuddy\byte-buddy-agent\1.17.8\byte-buddy-agent-1.17.8.jar)
 WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
 WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
 WARNING: Dynamic loading of agents will be disallowed by default in a future release
 Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
-[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.23 s -- in com.campushub.CampusHubApplicationTests
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.649 s -- in com.campushub.CampusHubApplicationTests
+[INFO] Running ������� JWT��ǩ����У������۸�
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.217 s -- in ������� JWT��ǩ����У������۸�
 [INFO] Running Ȩ�ޱ߽磺����Ա�������û�����
-[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.420 s -- in Ȩ�ޱ߽磺����Ա�������û�����
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in Ȩ�ޱ߽磺����Ա�������û�����
+[INFO] Running M5 ������̨���û�����Ʒ��ٱ�����
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.687 s -- in M5 ������̨���û�����Ʒ��ٱ�����
 [INFO] Running M3 ���ۣ�8 ��������״̬У��
-[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.023 s -- in M3 ���ۣ�8 ��������״̬У��
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.313 s -- in M3 ���ۣ�8 ��������״̬У��
 [INFO] Running M3 ���׵�����·����״̬����˽��Ȩ��
-[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.913 s -- in M3 ���׵�����·����״̬����˽��Ȩ��
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.143 s -- in M3 ���׵�����·����״̬����˽��Ȩ��
 [INFO] Running M2 ��Ʒ������״̬����˽����������������
-[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.521 s -- in M2 ��Ʒ������״̬����˽����������������
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.070 s -- in M2 ��Ʒ������״̬����˽����������������
+[INFO] Running M2/M3 վ�����ԣ����ʡ��ظ���δ��
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.072 s -- in M2/M3 վ�����ԣ����ʡ��ظ���δ��
+[INFO] Running M3 ԤԼ���ύ��ȷ�ϡ��ܾ���ȡ��
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.051 s -- in M3 ԤԼ���ύ��ȷ�ϡ��ܾ���ȡ��
 [INFO] Running M5 ���ۣ��ʸ�ȥ�������÷�
-[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.123 s -- in M5 ���ۣ��ʸ�ȥ�������÷�
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in M5 ���ۣ��ʸ�ȥ�������÷�
+[INFO] Running M1 ��֤��ע�ᡢ��¼����������
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.687 s -- in M1 ��֤��ע�ᡢ��¼����������
 [INFO] 
 [INFO] Results:
 [INFO] 
-[INFO] Tests run: 40, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 92, Failures: 0, Errors: 0, Skipped: 0
 [INFO] 
 [INFO] 
 [INFO] --- jacoco:0.8.12:report (report) @ campushub-backend ---
@@ -73,6 +83,7 @@ Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot lo
 [INFO] Analyzed bundle 'campushub-backend' with 39 classes
 [INFO] 
 [INFO] --- jar:3.4.2:jar (default-jar) @ campushub-backend ---
+[INFO] Building jar: E:\ideproject\campushub\backend\target\campushub-backend-0.0.1-SNAPSHOT.jar
 [INFO] 
 [INFO] --- spring-boot:3.5.16:repackage (repackage) @ campushub-backend ---
 [INFO] Replacing main artifact E:\ideproject\campushub\backend\target\campushub-backend-0.0.1-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
@@ -91,80 +102,79 @@ Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot lo
 [INFO] Starting SonarScanner Engine...
 [INFO] Java 21.0.12.1 Eclipse Adoptium (64-bit)
 [INFO] Load global settings
-[INFO] Load global settings (done) | time=113ms
+[INFO] Load global settings (done) | time=108ms
 [INFO] Server id: 303924D4-AaFdC2aL5z3B9wZFFVod
 [INFO] Loading required plugins
 [INFO] Load plugins index
-[INFO] Load plugins index (done) | time=15ms
+[INFO] Load plugins index (done) | time=11ms
 [INFO] Load/download plugins
-[INFO] Load/download plugins (done) | time=8ms
+[INFO] Load/download plugins (done) | time=5ms
 [INFO] Load project settings for component key: 'campushub-backend'
-[INFO] Load project settings for component key: 'campushub-backend' (done) | time=13ms
+[INFO] Load project settings for component key: 'campushub-backend' (done) | time=19ms
 [INFO] Process project properties
-[INFO] Process project properties (done) | time=18ms
+[INFO] Process project properties (done) | time=19ms
 [INFO] Project key: campushub-backend
 [INFO] Base dir: E:\ideproject\campushub\backend
 [INFO] Working dir: E:\ideproject\campushub\backend\target\sonar
 [INFO] Load quality profiles
-[INFO] Load quality profiles (done) | time=30ms
+[INFO] Load quality profiles (done) | time=28ms
 [INFO] Load active rules
-[INFO] Load active rules (done) | time=431ms
+[INFO] Load active rules (done) | time=139ms
 [INFO] Load analysis cache
-[INFO] Load analysis cache (2.0 kB) | time=50ms
+[INFO] Load analysis cache (2.2 kB) | time=21ms
 [INFO] Preprocessing files...
-[INFO] 2 languages detected in 57 preprocessed files (done) | time=396ms
+[INFO] 2 languages detected in 62 preprocessed files (done) | time=118ms
 [INFO] 0 files ignored because of scm ignore settings
 [INFO] Loading plugins for detected languages
 [INFO] Load/download plugins
-[INFO] Load/download plugins (done) | time=194ms
+[INFO] Load/download plugins (done) | time=16ms
 [INFO] Load project repositories
-[INFO] Load project repositories (done) | time=212ms
+[INFO] Load project repositories (done) | time=123ms
 [INFO] Indexing files...
 [INFO] Project configuration:
-[INFO] 57 files indexed (done) | time=29ms
+[INFO] 62 files indexed (done) | time=25ms
 [INFO] Quality profile for java: Sonar way core
 [INFO] Quality profile for xml: Sonar way core
 [INFO] ------------- Run sensors on module CampusHub ���
 [INFO] Load metrics repository
-[INFO] Load metrics repository (done) | time=79ms
+[INFO] Load metrics repository (done) | time=25ms
 [INFO] Sensor IaC YAML File Type Classification Sensor [iac]
-[INFO] Sensor IaC YAML File Type Classification Sensor [iac] (done) | time=7ms
+[INFO] Sensor IaC YAML File Type Classification Sensor [iac] (done) | time=1ms
 [INFO] Sensor JavaSensor [java]
 [INFO] Configured Java source version (sonar.java.source): 21, preview features enabled (sonar.java.enablePreview): false
 [INFO] Server-side caching is enabled. The Java analyzer will not try to leverage data from a previous analysis.
 [INFO] Using ECJ batch to parse 50 Main java source files with batch size 210 KB.
 [INFO] Starting batch processing.
 [INFO] The Java analyzer cannot skip unchanged files in this context. A full analysis is performed for all files.
-[INFO] 84% analyzed
 [INFO] 100% analyzed
 [INFO] Batch processing: Done.
 [INFO] Did not optimize analysis for any files, performed a full analysis for all 50 files.
-[INFO] Using ECJ batch to parse 6 Test java source files with batch size 210 KB.
+[INFO] Using ECJ batch to parse 11 Test java source files with batch size 210 KB.
 [INFO] Starting batch processing.
 [INFO] 100% analyzed
 [INFO] Batch processing: Done.
-[INFO] Did not optimize analysis for any files, performed a full analysis for all 6 files.
+[INFO] Did not optimize analysis for any files, performed a full analysis for all 11 files.
 [INFO] No "Generated" source files to scan.
-[INFO] Sensor JavaSensor [java] (done) | time=17982ms
+[INFO] Sensor JavaSensor [java] (done) | time=4997ms
 [INFO] Sensor JaCoCo XML Report Importer [jacoco]
 [INFO] 'sonar.coverage.jacoco.xmlReportPaths' is not defined. Using default locations: target/site/jacoco/jacoco.xml,target/site/jacoco-it/jacoco.xml,build/reports/jacoco/test/jacocoTestReport.xml
 [INFO] Importing 1 report(s). Turn your logs in debug mode in order to see the exhaustive list.
-[INFO] Sensor JaCoCo XML Report Importer [jacoco] (done) | time=290ms
+[INFO] Sensor JaCoCo XML Report Importer [jacoco] (done) | time=127ms
 [INFO] Sensor IaC hadolint report Sensor [iac]
-[INFO] Sensor IaC hadolint report Sensor [iac] (done) | time=3ms
+[INFO] Sensor IaC hadolint report Sensor [iac] (done) | time=0ms
 [INFO] Sensor Java Config Sensor [iac]
 [INFO] There are no files to be analyzed for the Java language
-[INFO] Sensor Java Config Sensor [iac] (done) | time=3ms
+[INFO] Sensor Java Config Sensor [iac] (done) | time=4ms
 [INFO] Sensor IaC Docker Sensor [iac]
 [INFO] There are no files to be analyzed for the Docker language
-[INFO] Sensor IaC Docker Sensor [iac] (done) | time=22ms
+[INFO] Sensor IaC Docker Sensor [iac] (done) | time=6ms
 [INFO] Sensor SurefireSensor [java]
 [INFO] parsing [E:\ideproject\campushub\backend\target\surefire-reports]
-[INFO] Sensor SurefireSensor [java] (done) | time=303ms
+[INFO] Sensor SurefireSensor [java] (done) | time=398ms
 [INFO] Sensor XML Sensor [xml]
 [INFO] 1 source file to be analyzed
 [INFO] 1/1 source file has been analyzed
-[INFO] Sensor XML Sensor [xml] (done) | time=292ms
+[INFO] Sensor XML Sensor [xml] (done) | time=102ms
 [INFO] Sensor TextAndSecretsSensor [text]
 [INFO] Available processors: 16
 [INFO] Using 16 threads for analysis.
@@ -172,43 +182,51 @@ Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot lo
 [INFO] Using Git CLI to retrieve dirty files
 [INFO] Retrieving language associated files and files included via "sonar.text.inclusions" that are tracked by git
 [INFO] Starting the text and secrets analysis
-[INFO] 57 source files to be analyzed for the text and secrets analysis
-[INFO] 57/57 source files have been analyzed for the text and secrets analysis
-[INFO] Sensor TextAndSecretsSensor [text] (done) | time=1481ms
+[INFO] 62 source files to be analyzed for the text and secrets analysis
+[INFO] 62/62 source files have been analyzed for the text and secrets analysis
+[INFO] Sensor TextAndSecretsSensor [text] (done) | time=604ms
 [INFO] ------------- Run sensors on project
 [INFO] Sensor JaCoCo Aggregate XML Report Importer [jacoco]
-[INFO] Sensor JaCoCo Aggregate XML Report Importer [jacoco] (done) | time=2ms
+[INFO] Sensor JaCoCo Aggregate XML Report Importer [jacoco] (done) | time=0ms
 [INFO] Sensor IaC Project Sensor [iac]
-[INFO] Sensor IaC Project Sensor [iac] (done) | time=6ms
+[INFO] Sensor IaC Project Sensor [iac] (done) | time=2ms
 [INFO] Sensor JavaProjectSensor [java]
-[INFO] Sensor JavaProjectSensor [java] (done) | time=12ms
+[INFO] Sensor JavaProjectSensor [java] (done) | time=1ms
 [INFO] Sensor Zero Coverage Sensor
-[INFO] Sensor Zero Coverage Sensor (done) | time=1ms
+[INFO] Sensor Zero Coverage Sensor (done) | time=0ms
 [INFO] Sensor Java CPD Block Indexer
-[INFO] Sensor Java CPD Block Indexer (done) | time=279ms
+[INFO] Sensor Java CPD Block Indexer (done) | time=55ms
 [INFO] ------------- Gather SCA dependencies on project
 [INFO] Dependency analysis skipped
 [INFO] SCM Publisher SCM provider for this project is: git
-[INFO] SCM Publisher 1 source file to be analyzed
-[INFO] SCM Publisher 0/1 source files have been analyzed (done) | time=423ms
+[INFO] SCM Publisher 9 source files to be analyzed
+[INFO] SCM Publisher 0/9 source files have been analyzed (done) | time=373ms
 [WARNING] Missing blame information for the following files:
-[WARNING]   * pom.xml
+[WARNING]   * src/test/java/com/campushub/service/ReservationServiceTest.java
+[WARNING]   * src/main/java/com/campushub/service/UserService.java
+[WARNING]   * src/test/java/com/campushub/service/UserServiceTest.java
+[WARNING]   * src/test/java/com/campushub/config/AuthInterceptorTest.java
+[WARNING]   * src/test/java/com/campushub/service/MessageServiceTest.java
+[WARNING]   * src/main/java/com/campushub/config/AuthInterceptor.java
+[WARNING]   * src/main/java/com/campushub/common/JwtUtil.java
+[WARNING]   * src/test/java/com/campushub/common/JwtUtilTest.java
+[WARNING]   * src/test/java/com/campushub/service/AdminServiceTest.java
 [WARNING] This may lead to missing/broken features in SonarQube
 [INFO] CPD Executor 13 files had no CPD blocks
 [INFO] CPD Executor Calculating CPD for 37 files
-[INFO] CPD Executor CPD calculation finished (done) | time=68ms
-[INFO] SCM revision ID '35455099da13ab8e9131e95a697806e29f0ecc77'
-[INFO] Analysis report generated in 401ms, dir size=488.8 kB
-[INFO] Analysis report compressed in 2821ms, zip size=202.8 kB
-[INFO] Analysis report uploaded in 132ms
+[INFO] CPD Executor CPD calculation finished (done) | time=26ms
+[INFO] SCM revision ID '9cb649f4b464bdec71d6ccc14da6cac2d2f70b0f'
+[INFO] Analysis report generated in 125ms, dir size=539.2 kB
+[INFO] Analysis report compressed in 1091ms, zip size=223.3 kB
+[INFO] Analysis report uploaded in 86ms
 [INFO] ANALYSIS SUCCESSFUL, you can find the results at: http://localhost:9000/dashboard?id=campushub-backend
 [INFO] Note that you will be able to access the updated dashboard once the server has processed the submitted analysis report
-[INFO] More about the report processing at http://localhost:9000/api/ce/task?id=6028a8b4-ba2c-4ad5-bd3d-446628460f51
-[INFO] Analysis total time: 33.823 s
+[INFO] More about the report processing at http://localhost:9000/api/ce/task?id=56ffca11-4d15-4db4-a64b-2149ac3c207d
+[INFO] Analysis total time: 12.777 s
 [INFO] SonarScanner Engine completed successfully
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  01:09 min
-[INFO] Finished at: 2026-10-21T14:16:38+08:00
+[INFO] Total time:  28.281 s
+[INFO] Finished at: 2026-10-21T15:51:50+08:00
 [INFO] ------------------------------------------------------------------------

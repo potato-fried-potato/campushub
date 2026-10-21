@@ -47,6 +47,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       TZ: Asia/Shanghai
       JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75}
+      # 生产部署请通过 .env 或环境变量覆盖，避免沿用仓库中的开发默认值
+      JWT_SECRET: ${JWT_SECRET:-campushub-jwt-secret-2026}
     ports:
       # 直连后端接口做调试用；前端容器通过服务名 backend:8080 访问
       - "${BACKEND_PORT:-8081}:8080"

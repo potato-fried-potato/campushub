@@ -5,6 +5,9 @@
 [INFO]   from pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ campushub-backend ---
+[INFO] argLine set to -javaagent:C:\\Users\\bhd32\\webapp\\apache-maven-3.9.9-bin\\apache-maven-3.9.9\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\ideproject\\campushub\\backend\\target\\jacoco.exec
+[INFO] 
 [INFO] --- resources:3.3.1:resources (default-resources) @ campushub-backend ---
 [INFO] Copying 1 resource from src\main\resources to target\classes
 [INFO] Copying 33 resources from src\main\resources to target\classes
@@ -25,8 +28,8 @@
 [INFO]  T E S T S
 [INFO] -------------------------------------------------------
 [INFO] Running com.campushub.CampusHubApplicationTests
-13:46:31.129 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.campushub.CampusHubApplicationTests]: CampusHubApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-13:46:31.222 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.campushub.CampusHubApplication for test class com.campushub.CampusHubApplicationTests
+15:48:40.248 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.campushub.CampusHubApplicationTests]: CampusHubApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+15:48:40.462 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.campushub.CampusHubApplication for test class com.campushub.CampusHubApplicationTests
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -37,36 +40,50 @@
 
  :: Spring Boot ::               (v3.5.16)
 
-2026-10-21T13:46:31.605+08:00  INFO 1260 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : Starting CampusHubApplicationTests using Java 21.0.11 with PID 1260 (started by bhd32 in E:\ideproject\campushub\backend)
-2026-10-21T13:46:31.605+08:00 DEBUG 1260 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : Running with Spring Boot v3.5.16, Spring v6.2.19
-2026-10-21T13:46:31.605+08:00  INFO 1260 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : No active profile set, falling back to 1 default profile: "default"
-2026-10-21T13:46:33.275+08:00  INFO 1260 --- [campushub] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
-2026-10-21T13:46:33.785+08:00  INFO 1260 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : Started CampusHubApplicationTests in 2.437 seconds (process running for 3.185)
+2026-10-21T15:48:41.263+08:00  INFO 18924 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : Starting CampusHubApplicationTests using Java 21.0.11 with PID 18924 (started by bhd32 in E:\ideproject\campushub\backend)
+2026-10-21T15:48:41.268+08:00 DEBUG 18924 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : Running with Spring Boot v3.5.16, Spring v6.2.19
+2026-10-21T15:48:41.268+08:00  INFO 18924 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : No active profile set, falling back to 1 default profile: "default"
+2026-10-21T15:48:43.113+08:00  INFO 18924 --- [campushub] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-10-21T15:48:43.524+08:00  INFO 18924 --- [campushub] [           main] c.campushub.CampusHubApplicationTests    : Started CampusHubApplicationTests in 2.761 seconds (process running for 4.354)
 Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
 WARNING: A Java agent has been loaded dynamically (C:\Users\bhd32\webapp\apache-maven-3.9.9-bin\apache-maven-3.9.9\net\bytebuddy\byte-buddy-agent\1.17.8\byte-buddy-agent-1.17.8.jar)
 WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
 WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
 WARNING: Dynamic loading of agents will be disallowed by default in a future release
-Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
-[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.312 s -- in com.campushub.CampusHubApplicationTests
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.299 s -- in com.campushub.CampusHubApplicationTests
+[INFO] Running 公共组件 JWT：签发、校验与防篡改
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.199 s -- in 公共组件 JWT：签发、校验与防篡改
 [INFO] Running 权限边界：管理员不参与用户交易
-[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.064 s -- in 权限边界：管理员不参与用户交易
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.031 s -- in 权限边界：管理员不参与用户交易
+[INFO] Running M5 管理后台：用户、商品与举报处置
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.622 s -- in M5 管理后台：用户、商品与举报处置
 [INFO] Running M3 砍价：8 折下限与状态校验
-[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.826 s -- in M3 砍价：8 折下限与状态校验
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.288 s -- in M3 砍价：8 折下限与状态校验
 [INFO] Running M3 交易单：三路径、状态机与私聊权限
-[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.148 s -- in M3 交易单：三路径、状态机与私聊权限
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.161 s -- in M3 交易单：三路径、状态机与私聊权限
 [INFO] Running M2 商品详情与状态：隐私、砍价下限与锁定
-[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.088 s -- in M2 商品详情与状态：隐私、砍价下限与锁定
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.062 s -- in M2 商品详情与状态：隐私、砍价下限与锁定
+[INFO] Running M2/M3 站内留言：提问、回复与未读
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.075 s -- in M2/M3 站内留言：提问、回复与未读
+[INFO] Running M3 预约：提交、确认、拒绝与取消
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.059 s -- in M3 预约：提交、确认、拒绝与取消
 [INFO] Running M5 评价：资格、去重与信用分
-[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in M5 评价：资格、去重与信用分
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in M5 评价：资格、去重与信用分
+[INFO] Running M1 认证：注册、登录与密码升级
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.700 s -- in M1 认证：注册、登录与密码升级
 [INFO] 
 [INFO] Results:
 [INFO] 
-[INFO] Tests run: 40, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Tests run: 92, Failures: 0, Errors: 0, Skipped: 0
 [INFO] 
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ campushub-backend ---
+[INFO] Loading execution data file E:\ideproject\campushub\backend\target\jacoco.exec
+[INFO] Analyzed bundle 'campushub-backend' with 39 classes
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
-[INFO] Total time:  6.901 s
-[INFO] Finished at: 2026-10-21T13:46:35+08:00
+[INFO] Total time:  9.583 s
+[INFO] Finished at: 2026-10-21T15:48:46+08:00
 [INFO] ------------------------------------------------------------------------

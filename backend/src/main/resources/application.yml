@@ -18,3 +18,9 @@ mybatis:
 logging:
   level:
     com.campushub: debug
+
+campushub:
+  jwt:
+    # 仅本地开发使用的默认值；生产环境务必通过 JWT_SECRET 环境变量覆盖
+    secret: ${JWT_SECRET:campushub-jwt-secret-2026}
+    expire-ms: ${JWT_EXPIRE_MS:604800000}

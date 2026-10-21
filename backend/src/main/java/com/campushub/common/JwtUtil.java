@@ -1,6 +1,8 @@
 package com.campushub.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -10,15 +12,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 手写 HS256 JWT，够用就行
+ * 手写 HS256 JWT。
+ * 签名密钥与有效期来自配置（campushub.jwt.secret / expire-ms），源码中不再保存密钥。
  */
+@Component
 public class JwtUtil {
 
-    private static final String SECRET = "campushub-jwt-secret-2026";
-    private static final long EXPIRE = 7L * 24 * 60 * 60 * 1000;
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public static String create(Long userId, String studentNo, String nickname, String role) {
+    private final byte[] secret;
+    private final long expireMillis;
+
+    public JwtUtil(@Value("${campushub.jwt.secret}") String secret,
+                   @Value("${campushub.jwt.expire-ms:604800000}") long expireMillis) {
+        if (secret == null || secret.trim().isEmpty()) {
+            throw new IllegalStateException("campushub.jwt.secret 不能为空");
+        }
+        this.secret = secret.getBytes(StandardCharsets.UTF_8);
+        this.expireMillis = expireMillis;
+    }
+
+    public String create(Long userId, String studentNo, String nickname, String role) {
         try {
             Map<String, Object> header = new HashMap<>();
             header.put("alg", "HS256");
@@ -28,7 +42,7 @@ public class JwtUtil {
             payload.put("studentNo", studentNo);
             payload.put("nickname", nickname);
             payload.put("role", role);
-            payload.put("exp", System.currentTimeMillis() + EXPIRE);
+            payload.put("exp", System.currentTimeMillis() + expireMillis);
             String h = encode(MAPPER.writeValueAsBytes(header));
             String p = encode(MAPPER.writeValueAsBytes(payload));
             return h + "." + p + "." + sign(h + "." + p);
@@ -38,7 +52,7 @@ public class JwtUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static Map<String, Object> parse(String token) {
+    public Map<String, Object> parse(String token) {
         try {
             String[] parts = token.split("\\.");
             if (parts.length != 3) {
@@ -59,14 +73,14 @@ public class JwtUtil {
         }
     }
 
-    private static String encode(byte[] bytes) {
+    private String encode(byte[] bytes) {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
-    private static String sign(String content) {
+    private String sign(String content) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
-            mac.init(new SecretKeySpec(SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            mac.init(new SecretKeySpec(secret, "HmacSHA256"));
             return encode(mac.doFinal(content.getBytes(StandardCharsets.UTF_8)));
         } catch (Exception e) {
             throw new RuntimeException(e);

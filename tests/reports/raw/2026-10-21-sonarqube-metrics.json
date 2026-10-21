@@ -7,12 +7,12 @@
     "measures": [
       {
         "metric": "coverage",
-        "value": "27.7",
+        "value": "47.2",
         "bestValue": false
       },
       {
         "metric": "complexity",
-        "value": "731"
+        "value": "736"
       },
       {
         "metric": "reliability_rating",
@@ -26,13 +26,13 @@
       },
       {
         "metric": "code_smells",
-        "value": "42",
+        "value": "41",
         "bestValue": false
       },
       {
         "metric": "security_rating",
-        "value": "5.0",
-        "bestValue": false
+        "value": "1.0",
+        "bestValue": true
       },
       {
         "metric": "security_hotspots",
@@ -41,7 +41,7 @@
       },
       {
         "metric": "sqale_index",
-        "value": "210",
+        "value": "205",
         "bestValue": false
       },
       {
@@ -56,26 +56,26 @@
       },
       {
         "metric": "branch_coverage",
-        "value": "22.2",
+        "value": "38.2",
         "bestValue": false
       },
       {
         "metric": "cognitive_complexity",
-        "value": "353",
+        "value": "355",
         "bestValue": false
       },
       {
         "metric": "ncloc",
-        "value": "2926"
+        "value": "2944"
       },
       {
         "metric": "vulnerabilities",
-        "value": "1",
-        "bestValue": false
+        "value": "0",
+        "bestValue": true
       },
       {
         "metric": "line_coverage",
-        "value": "30.7",
+        "value": "52.1",
         "bestValue": false
       }
     ]

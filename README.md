@@ -2,7 +2,7 @@
 
 > **《软件工程项目实现》课程设计 · 软件工程 2402 · 第 11 组**  
 > **技术栈**：Spring Boot 3 + Vue 3 (Vite 工程化) + MySQL 8.0 + Docker Compose（零外部中间件开箱即用体系，技术决策见 `docs/01`）  
-> **当前状态**：三天计划全部完成——Day 1 ~ Day 3 的 8 个成员提交均已合并 `develop`，12 个用户故事全部落地；自动化测试：后端 JUnit 40 项、Apifox 全量集合 96 请求 / 117 断言（Apifox 场景 96 步全绿、未测 0）、Playwright UI 10 条流程，接口脚本 `tests/api-e2e.ps1` 62 项断言；已完成容器化部署与 GitHub Actions CI/CD 流水线（详见 `docs/07`）。收尾优化与交易闭环重构已完成（进度见 `docs/05` 第四节）。
+> **当前状态**：三天计划全部完成——Day 1 ~ Day 3 的 8 个成员提交均已合并 `develop`，12 个用户故事全部落地；自动化测试：后端 JUnit 92 项、Apifox 全量集合 96 请求 / 117 断言（Apifox 场景 96 步全绿、未测 0）、Playwright UI 10 条流程，接口脚本 `tests/api-e2e.ps1` 65 项断言；已完成容器化部署与 GitHub Actions CI/CD 流水线（详见 `docs/07`）。收尾优化与交易闭环重构已完成（进度见 `docs/05` 第四节）。
 
 ---
 
@@ -207,7 +207,7 @@ docker compose up -d --build
 - `一键启动.bat`：六步自检（JDK 21 → MySQL80 服务 → 数据库结构与自动导入 → 前端产物构建 → 后端打包 → 启动并打开浏览器）；
 - `一键停止.bat`：释放 8080 端口并关闭后端进程；
 - `db\init-db.bat`：一键重建演示数据（14 用户 / 6 分类 / 32 商品 / 45 图 / 5 条砍价 / 1 张交易单 / 3 条交易单私聊）；
-- `tests\api-e2e.ps1`：接口 E2E 回归（62 项断言），覆盖认证、鉴权、检索、详情（含手机号不外泄）、留言、砍价 8 折下限、预约、交易单三路径成交与取消、交易单私聊权限、评价举报、管理后台与「管理员不参与用户交易」的关键断言。
+- `tests\api-e2e.ps1`：接口 E2E 回归（65 项断言），覆盖认证、鉴权、检索、详情（含手机号不外泄）、留言、砍价 8 折下限、预约、交易单三路径成交与取消、交易单私聊权限、评价举报、举报处置后强制下架、管理后台与「管理员不参与用户交易」的关键断言。
 - `tests\run-regression.ps1`：一键串起单元 / 集成 / 系统三层回归。PowerShell 7 用 `pwsh -File tests\run-regression.ps1`，Windows PowerShell 5.1 用 `powershell -NoProfile -ExecutionPolicy Bypass -File tests\run-regression.ps1`；原始输出自动留档到 `tests\reports\raw\`，退出码非 0 即表示有失败层次。
 - `tests\run-sonar.ps1`：代码质量分析（SonarQube 自托管）。先 `docker compose -f docker-compose.sonar.yml up -d` 起分析环境，再执行脚本，自动跑测试、采集 JaCoCo 覆盖率、上传分析并抓取质量指标留档。
 
@@ -215,13 +215,13 @@ docker compose up -d --build
 
 | 层 | 命令 / 入口 | 覆盖 |
 | :--- | :--- | :--- |
-| 后端单元测试 | `cd backend && mvn test` | JUnit 5 + Mockito，40 项：砍价 8 折边界、交易单状态机、私聊权限、评价资格、商品隐私与状态流转、管理员隔离 |
+| 后端单元测试 | `cd backend && mvn test` | JUnit 5 + Mockito，92 项：JWT 签发/防篡改/过期、注册登录与密码升级、站内留言与未读、预约全状态、管理端用户/商品/举报处置、砍价 8 折边界、交易单状态机、私聊权限、评价资格、商品隐私与状态流转、管理员隔离 |
 | API（Apifox） | 导入 [tests/apifox](tests/apifox/README.md) 下的全量集合与环境 | 96 个请求 / 117 条断言：认证、商品、留言、砍价、预约、交易单、私聊、评价举报、管理端与权限；Apifox 场景 96 步全绿、未测 0（其中 2 条 401 用例关闭场景默认响应码校验只留断言，1 条图片上传用例手动挂接文件） |
 | UI（Playwright） | `cd frontend && npm run test:ui` | 10 条流程：买家下单→确认成交→我的购买、管理员独立入口、管理员用户端登录拦截、砍价下限弹窗校验、集市搜索与筛选、发布闲置弹窗、商品问答、预约购买、我的购买联系卖家私聊、信用中心 |
 
 > Playwright 默认使用系统 Edge（`channel: 'msedge'`），无需额外下载浏览器；CI 中设 `PW_CHANNEL=bundled` 改用 Playwright 自带 Chromium。执行前需有可用后端，配置会自动复用已启动的 8080 服务。Apifox 集合同样可用 Newman 无头执行：`npx newman run tests/apifox/campushub-apifox.postman_collection.json -e tests/apifox/campushub-apifox.environment.json`。
 
-**测试与质量留档**：原始执行输出、环境快照与 10 张关键页面截图存放于 [tests/reports](tests/reports/README.md)，当次汇总见 [2026-10-21 全量回归记录](tests/reports/2026-10-21-全量回归记录.md)；代码质量（SonarQube）结果见 [2026-10-21 SonarQube 代码质量报告](tests/reports/2026-10-21-SonarQube代码质量报告.md)。
+**测试与质量留档**：原始执行输出、环境快照、8 张页面截图与 2 张 SonarQube 质量看板存放于 [tests/reports](tests/reports/README.md)，当次汇总见 [2026-10-21 全量回归记录](tests/reports/2026-10-21-全量回归记录.md)；代码质量结果见 [2026-10-21 SonarQube 代码质量报告](tests/reports/2026-10-21-SonarQube代码质量报告.md)。
 
 **持续集成与持续部署**
 
@@ -246,4 +246,4 @@ docker compose up -d --build
 4. **[04. 敏捷协作与 Git 工作流规范](docs/04_敏捷协作与Git工作流规范.md)**：包含迭代节奏、看板与会议机制、Git Flow 分支策略、Conventional Commits 与代码评审规则；
 5. **[05. 团队组织与功能模块分工](docs/05_团队组织与功能模块分工.md)**：用户 / 商品 / 交易与互动 / 平台门户 / 信用与治理 5 个功能模块 + 工程交付线的模块负责制分工表；
 6. **[06. 测试用例与执行规范](docs/06_测试用例与执行规范.md)**：包含按 M1~M6 功能模块组织的 63 条测试用例（接口 / UI / 脚本分层）、执行时机、留档规范与截至 2026-10-21 的执行结果；
-7. **[07. Docker 部署方案与 CI/CD 流水线](docs/07_Docker部署与CICD流水线.md)**：包含前端 / 后端 / 数据库的容器化设计、环境变量与运维命令、CI 三层测试门禁与 CD 发布验证流程。
+7. **[07. Docker 部署方案与 CI/CD 流水线](docs/07_Docker部署与CICD流水线.md)**：包含前端 / 后端 / 数据库的容器化设计、环境变量与运维命令、CI 三层测试门禁、CD 发布验证流程，以及自托管 SonarQube 代码质量分析。

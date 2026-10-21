@@ -17,7 +17,7 @@ tests/reports/
 │   ├─ <日期>-sonarqube-scan.txt       SonarQube 扫描原始日志
 │   ├─ <日期>-sonarqube-metrics.json   代码质量指标（Web API 原始响应）
 │   └─ <日期>-sonarqube-qualitygate.json 质量门禁判定
-└─ screenshots/<日期>/*.jpg     关键页面截图留档
+└─ screenshots/<日期>/         界面留档：8 张页面截图（.jpg）+ 2 张 SonarQube 质量看板（.png）
 ```
 
 > Apifox 图形界面导出的场景报告（HTML 与结果页截图）与集合放在一起，位于 `tests/apifox/`，本目录的回归记录会链接引用。

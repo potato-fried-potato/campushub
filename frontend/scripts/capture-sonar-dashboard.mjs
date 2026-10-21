@@ -38,6 +38,14 @@ await login()
 
 await page.goto(`${BASE}/dashboard?id=${PROJECT}`, { waitUntil: 'domcontentloaded' })
 await page.waitForTimeout(6000)
+
+// SonarQube 默认可能停在「New Code」页签，切到「Overall Code」才能看到总体覆盖率
+const overallTab = page.getByText('Overall Code', { exact: true }).first()
+if (await overallTab.count()) {
+  await overallTab.click()
+  await page.waitForTimeout(2500)
+}
+
 const overview = path.join(outDir, '09-SonarQube-代码质量总览.png')
 await page.screenshot({ path: overview, fullPage: true })
 console.log(`captured ${path.basename(overview)}`)

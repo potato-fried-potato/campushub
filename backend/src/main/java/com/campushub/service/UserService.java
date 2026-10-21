@@ -3,7 +3,6 @@ package com.campushub.service;
 import com.campushub.entity.User;
 import com.campushub.common.JwtUtil;
 import com.campushub.mapper.UserMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +14,16 @@ import java.util.Map;
 @Service
 public class UserService {
 
-    @Autowired
-    private UserMapper userMapper;
-
     // 直接用 BCrypt 工具类，不引入整套 Spring Security
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    private final UserMapper userMapper;
+    private final JwtUtil jwtUtil;
+
+    public UserService(UserMapper userMapper, JwtUtil jwtUtil) {
+        this.userMapper = userMapper;
+        this.jwtUtil = jwtUtil;
+    }
 
     /**
      * 登录，成功返回 token 和用户信息，失败返回 null
@@ -37,7 +41,7 @@ public class UserService {
             error.put("errorCode", 4007);
             return error;
         }
-        String token = JwtUtil.create(user.getId(), user.getStudentNo(), user.getNickname(), user.getRole());
+        String token = jwtUtil.create(user.getId(), user.getStudentNo(), user.getNickname(), user.getRole());
         user.setPassword(null); // 不要把密码返给前端
         Map<String, Object> data = new HashMap<>();
         data.put("token", token);
@@ -63,7 +67,7 @@ public class UserService {
         userMapper.insertUser(user);
 
         // 注册成功直接当登录
-        String token = JwtUtil.create(user.getId(), user.getStudentNo(), user.getNickname(), user.getRole());
+        String token = jwtUtil.create(user.getId(), user.getStudentNo(), user.getNickname(), user.getRole());
         user.setPassword(null);
         Map<String, Object> data = new HashMap<>();
         data.put("token", token);

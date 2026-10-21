@@ -14,11 +14,17 @@ import java.util.Map;
 @Component
 public class AuthInterceptor implements HandlerInterceptor {
 
+    private final JwtUtil jwtUtil;
+
+    public AuthInterceptor(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
-            Map<String, Object> claims = JwtUtil.parse(token.substring(7));
+            Map<String, Object> claims = jwtUtil.parse(token.substring(7));
             if (claims != null) {
                 request.setAttribute("userId", Long.valueOf(String.valueOf(claims.get("sub"))));
                 request.setAttribute("role", claims.get("role"));

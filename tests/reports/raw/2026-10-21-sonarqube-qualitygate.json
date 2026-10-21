@@ -4,6 +4,13 @@
     "conditions": [
       {
         "status": "OK",
+        "metricKey": "new_coverage",
+        "comparator": "LT",
+        "errorThreshold": "80",
+        "actualValue": "81.8"
+      },
+      {
+        "status": "OK",
         "metricKey": "new_duplicated_lines_density",
         "comparator": "GT",
         "errorThreshold": "3",

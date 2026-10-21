@@ -1,5 +1,6 @@
 package com.campushub.config;
 
+import com.campushub.common.JwtUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -10,7 +11,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 @DisplayName("权限边界：管理员不参与用户交易")
 class AuthInterceptorTest {
 
-    private final AuthInterceptor interceptor = new AuthInterceptor();
+    private final AuthInterceptor interceptor =
+            new AuthInterceptor(new JwtUtil("unit-test-secret", 3_600_000L));
 
     private MockHttpServletRequest request(String method, String uri) {
         return new MockHttpServletRequest(method, uri);

@@ -4,7 +4,7 @@
 > **课程班级**：软件工程 2402 · 第 11 组  
 > **制定人员**：边皓东（组长）  
 > **生效版本**：v1.0.0（与 01 需求基线、02 API 契约、03 数据字典、06 测试用例配套）  
-> **交付状态**：前端 / 后端 / 数据库三容器部署方案已落地并实测通过（三层回归 40 + 62 + 10 全绿）；CI 覆盖单元测试、前端构建、容器内集成与系统测试；CD 在打版本标签后构建并推送两个镜像，再用发布镜像真实部署回归
+> **交付状态**：前端 / 后端 / 数据库三容器部署方案已落地并实测通过（三层回归 92 + 65 + 10 全绿）；CI 覆盖单元测试、前端构建、容器内集成与系统测试；CD 在打版本标签后构建并推送两个镜像，再用发布镜像真实部署回归；代码质量由自托管 SonarQube 分析，质量门禁通过、覆盖率 47.2%
 
 ---
 
@@ -65,6 +65,7 @@
 | `JAVA_OPTS` | `-XX:MaxRAMPercentage=75` | JVM 运行参数 |
 | `MAVEN_MIRROR_URL` | 阿里云公共仓库 | **仅后端镜像构建期生效**，用于拉取 Maven 依赖；留空则走官方 Maven Central |
 | `BACKEND_IMAGE` / `FRONTEND_IMAGE` | `campushub-backend:local` / `campushub-frontend:local` | 两个应用的镜像名，部署到目标机器时指向已发布镜像 |
+| `JWT_SECRET` | `campushub-jwt-secret-2026` | JWT 签名密钥；**生产环境必须改成随机值**，修改后所有旧 token 失效 |
 
 ---
 
@@ -143,11 +144,11 @@ docker compose up -d --no-build
 
 | 层次 | 载体 | 规模（截至 2026-10-21） | 触发位置 |
 | :--- | :--- | :--- | :--- |
-| 单元测试 | `backend/src/test`（JUnit 5 + Mockito） | 40 项 | CI `unit-test` |
-| 集成测试 | `tests/api-e2e.ps1` 断言组 | 62 项断言 | CI `integration-system-test` |
+| 单元测试 | `backend/src/test`（JUnit 5 + Mockito） | 92 项 | CI `unit-test` |
+| 集成测试 | `tests/api-e2e.ps1` 断言组 | 65 项断言 | CI `integration-system-test` |
 | 集成测试（图形化） | Apifox 全量集合 / Newman | 96 请求 / 117 断言 | 迭代末手工回归 |
 | 系统测试 | Playwright（`frontend/e2e`） | 10 条 UI 流程 | CI `integration-system-test` |
-| 发布验证 | CD 流水线 | 冒烟 + 62 项接口断言 | CD `deploy-verify` |
+| 发布验证 | CD 流水线 | 冒烟 + 65 项接口断言 | CD `deploy-verify` |
 
 用例编号、覆盖范围与手工复核要求见 `docs/06`；原始执行输出与截图留档见 `tests/reports/`。
 
@@ -173,12 +174,12 @@ docker compose -f docker-compose.sonar.yml down      # 停止，保留分析数�
 | 指标 | 数值 |
 | :--- | :--- |
 | 质量门禁 | 通过（OK） |
-| Bugs / Vulnerabilities / Code Smells | 0 / **1** / 42 |
-| 覆盖率 | 27.7%（行 30.7% / 分支 22.2%） |
+| Bugs / Vulnerabilities / Code Smells | 0 / **0** / 41 |
+| 覆盖率 | 47.2%（行 52.1% / 分支 38.2%） |
 | 重复率 | 3.5% |
-| 代码规模 | 2,926 行（ncloc） |
+| 代码规模 | 2,944 行（ncloc） |
 
-> 唯一的漏洞是 `java:S6437`：`JwtUtil` 中 JWT 签名密钥硬编码。该改动落在认证链路上（会使已签发令牌失效），需要产品侧确认后再处理，**当前未修改**；42 条代码异味全部是 `java:S6813`（Spring 字段注入）。
+> 原唯一的漏洞 `java:S6437`（`JwtUtil` 硬编码 JWT 密钥）**已修复**：密钥改为从 `campushub.jwt.secret` 读取，支持 `JWT_SECRET` 环境变量覆盖，开发默认值与原来一致，因此不影响已签发令牌。剩余 41 条代码异味全部是 `java:S6813`（Spring 字段注入）。
 
 ---
 

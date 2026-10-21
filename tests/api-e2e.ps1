@@ -234,6 +234,15 @@ Check '线下已售商品不可评价' ($reviewD.code -eq 4003)
 $detailD = GetApi "$base/items/$itemD" $token
 Check '线下已售不产生交易单' ($detailD.data.status -eq 'SOLD' -and $null -eq $detailD.data.dealStatus)
 
+# 13. 举报处置闭环：管理员下架被举报商品（AC-11.3 / AC-12.4）
+$itemE = NewTestItem $token "E2E举报处置$suffix" 50
+$reportE = PostJson "$base/reports" @{ itemId = $itemE; reason = 'FAKE'; detail = 'E2E 举报处置闭环' } $buyerToken
+Check '可对商品提交举报（处置前置）' ($reportE.code -eq 0)
+$handleE = PatchJson "$base/admin/reports/$($reportE.data.id)" @{ action = 'OFF_SHELF' } $adminToken
+Check '管理员处置举报成功' ($handleE.code -eq 0)
+$detailE = GetApi "$base/items/$itemE" $token
+Check '举报处置后商品被强制下架' ($detailE.data.status -eq 'OFF_SHELF')
+
 Write-Host ""
 Write-Host "通过 $pass 项，失败 $fail 项" -ForegroundColor Cyan
 if ($fail -gt 0) { exit 1 }
