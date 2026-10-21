@@ -189,6 +189,7 @@ docker compose -f docker-compose.sonar.yml down      # 停止，保留分析数�
 | 构建阶段报 `Could not transfer ... from/to central` 超时 | 构建容器无法直连 Maven Central | 在 `.env` 中设置 `MAVEN_MIRROR_URL` 指向可用镜像源（默认已给阿里云） |
 | 种子数据中文显示为乱码 | 数据库容器区域设置非 UTF-8，导入被二次编码 | 确认 compose 中 `LANG=C.UTF-8` 未被移除；已乱码的库执行 `docker compose down -v` 后重建 |
 | 前端页面打开但接口 502 | 后端容器未就绪或已退出 | `docker compose logs backend` 查看启动日志；前端 `depends_on` 已等待后端 healthy，若手动重启后端，稍等其健康检查通过 |
+| 前端容器启动即退出，日志报 `host not found in upstream "backend"` | 用 `docker run` 单独起容器时缺少 compose 的服务名 DNS 别名（`backend` 是服务名而非容器名） | 启动后端容器时加 `--network-alias backend`；用 compose 编排时不受影响 |
 | 宿主机 3306 / 8081 端口被占用 | 本机已有 MySQL 或其它服务 | 调整 `.env` 中的 `MYSQL_PORT` / `BACKEND_PORT` |
 | 应用启动即退出 | 数据库未就绪或密码不匹配 | 先看 `docker compose logs mysql`，确认 `MYSQL_ROOT_PASSWORD` 与 `.env` 一致 |
 
